@@ -1,0 +1,16 @@
+- id: joystick
+  type: Input
+  pos:
+    x: center
+    y: middle-bottom
+  components:
+    - type: Spritesheet
+      src: controls/joystick
+      size:
+        w: 128
+        h: 128
+      rows: 2
+      cols: 5
+      sprite:
+        row: 0
+        col: 0

@@ -1,0 +1,60 @@
+- id: bullet
+  type: Projectile
+  collidable:
+    health: 1
+    damage: 3
+  speed:
+    up: 3
+  components:
+    - type: Img
+      src: projectiles/bullet
+      size:
+        w: 9
+        h: 8
+
+- id: laser
+  type: Projectile
+  collidable:
+    health: 1
+    damage: 10
+  speed:
+    up: 7
+  components:
+    - type: Img
+      src: projectiles/laser
+      size:
+        w: 39
+        h: 17
+
+- id: missile
+  type: Projectile
+  collidable:
+    health: 1
+    damage: 5
+  speed:
+    up: 5
+  components:
+    - type: Img
+      src: projectiles/missile
+      size:
+        w: 51
+        h: 10
+
+- id: missile-a
+  type: Projectile
+  collidable:
+    health: 1
+    damage: 5
+  speed:
+    up: 5
+  components:
+    - type: Spritesheet
+      src: projectiles/missile-a
+      size:
+        w: 12
+        h: 18
+      rows: 1
+      cols: 7
+      sprite:
+        row: 0
+        col: 0

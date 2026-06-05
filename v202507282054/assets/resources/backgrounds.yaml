@@ -1,0 +1,29 @@
+- id: 1st-starfield
+  type: MovingBackground
+  speed:
+    down: 1
+  components:
+    - type: Parallax
+      src: backgrounds/1st-starfield
+      size:
+        h: 960
+
+- id: 1st-parallax-a
+  type: MovingBackground
+  speed:
+    down: 1
+  components:
+    - type: Parallax
+      src: backgrounds/1st-parallax-a
+      size:
+        h: 800
+
+- id: 1st-parallax-b
+  type: MovingBackground
+  speed:
+    down: 1
+  components:
+    - type: Parallax
+      src: backgrounds/1st-parallax-b
+      size:
+        h: 800
