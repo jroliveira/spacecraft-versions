@@ -1,0 +1,26 @@
+- id: 1st
+  type: MovingBackground
+  pos:
+    y: 900
+  speed: 2
+  components:
+    - type: Parallax
+      src: backgrounds/1st-starfield
+      height: 900
+    - type: Parallax
+      src: backgrounds/1st-parallax-a
+      height: 900
+    - type: Parallax
+      src: backgrounds/1st-parallax-b
+      height: 900
+
+- id: 2nd
+  type: Background
+  pos:
+    x: -80
+    y: -80
+  components:
+    - type: Img
+      src: backgrounds/2nd-starbase
+      width: 540
+      height: 500

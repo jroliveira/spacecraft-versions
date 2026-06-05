@@ -1,0 +1,49 @@
+- id: loading
+  type: Scenario
+  setup:
+    images: []
+    resources: []
+  components:
+    - type: Loading
+      src: components/loading
+      width: 2500
+      height: 100
+      pos:
+        x: center
+        y: center
+      frame:
+        ticks: 5
+        total: 25
+
+- id: 1st
+  type: Scenario
+  phase:
+    id: 1st
+  setup:
+    images:
+      - backgrounds/1st-starfield
+      - backgrounds/1st-parallax-a
+      - backgrounds/1st-parallax-b
+      - characters/one-f
+      - components/loading
+      - enemies/asteroid
+      - objects/starbase
+      - projectiles/bullet
+      - projectiles/laser
+      - projectiles/missile
+      - projectiles/missile-a
+    resources: []
+  components: []
+
+- id: 2nd
+  type: Scenario
+  phase:
+    id: 2nd
+  setup:
+    images:
+      - backgrounds/2nd-starbase
+      - characters/olive
+      - components/loading
+      - objects/starbase
+    resources: []
+  components: []
