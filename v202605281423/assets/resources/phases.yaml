@@ -1,0 +1,49 @@
+- id: 1st
+  type: Phase
+  entities:
+    - id: 1st-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-a
+      resource: enemies
+      method:
+        id: loop
+        interval: 2000
+    - id: starbase
+      resource: objects
+      method:
+        id: unique
+        interval: 40000
+  components:
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
+
+- id: 2nd
+  type: Phase
+  entities:
+    - id: olive-a
+      resource: characters
+      method:
+        id: start
+    - id: house
+      resource: objects
+      method:
+        id: start
+    - id: joystick-a
+      resource: controls
+      method:
+        id: start
+  components:
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
