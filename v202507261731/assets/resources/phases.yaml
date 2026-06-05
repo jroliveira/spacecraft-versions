@@ -1,0 +1,33 @@
+- id: 1st
+  type: Phase
+  entities:
+    - id: 1st
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f
+      resource: characters
+      method:
+        id: start
+    - id: asteroid
+      resource: enemies
+      method:
+        id: loop
+        interval: 3000
+    - id: starbase
+      resource: objects
+      method:
+        id: unique
+        interval: 20000
+
+- id: 2nd
+  type: Phase
+  entities:
+    - id: olive
+      resource: characters
+      method:
+        id: start
+    - id: house
+      resource: objects
+      method:
+        id: start
