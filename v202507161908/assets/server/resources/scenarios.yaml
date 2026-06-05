@@ -1,0 +1,48 @@
+- name: loading
+  canvas:
+    width: 900
+    height: 540
+  components:
+    - type: Loading
+      src: components/loading
+      width: 2500
+      height: 100
+      pos:
+        x: 400
+        y: 220
+      frame:
+        ticks: 67
+        total: 25
+
+- name: first
+  canvas:
+    width: 900
+    height: 540
+  phase:
+    name: first
+  setup:
+    images:
+      - backgrounds/starfield
+      - characters/ship
+      - enemies/asteroid
+      - projectiles/bullet
+      - projectiles/laser
+      - projectiles/missile
+      - objects/starbase
+      - components/loading
+    resources: []
+  components: []
+
+- name: starbase
+  canvas:
+    width: 900
+    height: 540
+  phase:
+    name: starbase
+  setup:
+    images:
+      - characters/soldier
+      - objects/starbase
+      - components/loading
+    resources: []
+  components: []

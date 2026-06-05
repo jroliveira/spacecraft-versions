@@ -1,0 +1,74 @@
+- type: Soldier
+  collidable:
+    health: 50
+    damage: 100
+  timeNextMove: 250
+  width: 48
+  height: 48
+  sprite:
+    row: 0
+    col: 0
+  pos:
+    x: 450
+    y: 470
+  canvas:
+    width: 900
+    height: 540
+  components:
+    - type: Sprite
+      src: characters/soldier
+      width: 32
+      height: 32
+    - type: Minimap
+      pos:
+        x: 850
+        y: 15
+  speed:
+    up: 1
+    left: 1
+    right: 1
+    down: 1
+
+- type: Ship
+  collidable:
+    health: 50
+    damage: 100
+  timeNextMove: 83
+  width: 64.5
+  height: 58.4
+  sprite:
+    row: 0
+    col: 0
+  pos:
+    x: 1
+    y: 9
+  canvas:
+    width: 900
+    height: 540
+  components:
+    - type: Sprite
+      src: characters/ship
+      width: 43
+      height: 39
+    - type: HealthBar
+      outer:
+        color: white
+        pos:
+          x: 0
+          y: 10
+        width: 2
+        height: 7
+      inner:
+        color: red
+        pos:
+          x: 1
+          y: 9
+        height: 5
+  projectiles:
+    first: bullet
+    second: missile
+  speed:
+    up: 2
+    left: 2
+    right: 2
+    down: 2

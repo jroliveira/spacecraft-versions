@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spacecraft · versões</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      background: radial-gradient(1200px 600px at 50% -10%, #16243a 0%, #0a0e17 55%, #060810 100%);
+      color: #cde0ff;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 56px 20px 80px; }
+    h1 { font-size: 26px; letter-spacing: .14em; margin: 0 0 4px; color: #eaf2ff; text-transform: uppercase; }
+    .sub { color: #6f86a8; font-size: 13px; margin: 0 0 24px; letter-spacing: .04em; }
+    .note {
+      display: flex; gap: 12px; align-items: flex-start;
+      margin: 0 0 32px; padding: 14px 16px;
+      background: rgba(120,90,30,.16); border: 1px solid rgba(220,170,70,.32);
+      border-radius: 10px; color: #e8d5a8; font-size: 13px; line-height: 1.5;
+    }
+    .note .ico { flex: none; font-size: 16px; line-height: 1.4; }
+    .note b { color: #ffe7b0; }
+    .note code {
+      background: rgba(0,0,0,.3); padding: 1px 6px; border-radius: 4px;
+      font-size: 12px; color: #ffe7b0;
+    }
+    .list { display: grid; gap: 10px; }
+    a.v {
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px;
+      padding: 14px 18px; text-decoration: none; color: inherit;
+      background: linear-gradient(90deg, rgba(28,44,74,.55), rgba(20,30,52,.35));
+      border: 1px solid rgba(90,130,200,.18); border-radius: 10px;
+      transition: border-color .15s, transform .12s, background .15s;
+    }
+    a.v:hover { border-color: rgba(120,180,255,.55); transform: translateX(3px); background: linear-gradient(90deg, rgba(40,66,110,.7), rgba(24,38,66,.45)); }
+    .tag { font-size: 13px; color: #7fd4ff; letter-spacing: .03em; }
+    .marco { font-size: 14px; color: #dce8fb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .date { font-size: 12px; color: #5f7596; }
+    footer { margin-top: 40px; color: #45567a; font-size: 12px; text-align: center; letter-spacing: .05em; }
+    @media (max-width: 520px) {
+      a.v { grid-template-columns: 1fr; gap: 4px; }
+      .date { color: #6f86a8; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Spacecraft</h1>
+    <p class="sub">galeria de versões jogáveis · cada marco visual, preservado e jogável na web</p>
+    <div class="note">
+      <span class="ico">⚠</span>
+      <span>
+        <b>Ao trocar de versão, limpe os dados do site.</b> Todas as versões rodam na mesma
+        origem, então compartilham <b>IndexedDB</b>, cache e Service Worker — e o esquema de
+        dados muda entre versões. Se uma versão se comportar estranho, abra o DevTools
+        (<code>F12</code>) → <b>Application</b> → <b>Storage</b> → <b>Clear site data</b>
+        (ou <code>Ctrl+Shift+Del</code>) e recarregue.
+      </span>
+    </div>
+    <div class="list">
+      <a class="v" href="./v202507161908/">
+        <span class="tag">v202507161908</span>
+        <span class="marco">new version (reescrita base)</span>
+        <span class="date">2025-07-16 19:08</span>
+      </a>
+    </div>
+    <footer>1 versão(ões) · build reprodutível por <code>git archive</code></footer>
+  </main>
+</body>
+</html>
