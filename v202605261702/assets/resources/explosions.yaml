@@ -1,0 +1,115 @@
+- id: explosion-a-1
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 512
+    h: 512
+  animation:
+    duration: 800
+    loop: false
+    autoRemove: true
+  components:
+    - type: Spritesheet
+      src: explosions/explosion-a-1
+      size:
+        w: 512
+        h: 512
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
+
+- id: explosion-a-1.1
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 256
+    h: 256
+  animation:
+    duration: 800
+    loop: false
+    autoRemove: true
+  components:
+    - type: ProSpritesheet
+      src: explosions/explosion-a-1
+      size:
+        w: 256
+        h: 256
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
+
+- id: explosion-a-2
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 384
+    h: 384
+  animation:
+    duration: 1600
+    loop: false
+    autoRemove: true
+  components:
+    - type: ProSpritesheet
+      src: explosions/explosion-a-2
+      size:
+        w: 384
+        h: 384
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
+
+- id: explosion-a-3
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 224
+    h: 224
+  animation:
+    duration: 800
+    loop: false
+    autoRemove: true
+  components:
+    - type: ProSpritesheet
+      src: explosions/explosion-a-3
+      size:
+        w: 224
+        h: 224
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
