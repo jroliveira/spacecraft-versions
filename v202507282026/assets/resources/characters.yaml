@@ -1,0 +1,80 @@
+- id: olive
+  type: Soldier
+  collidable:
+    health: 50
+    damage: 100
+  pos:
+    x: center
+    y: bottom
+  speed:
+    up: 1
+    left: 1
+    right: 1
+    down: 1
+  components:
+    - type: Spritesheet
+      src: characters/olive
+      size:
+        w: 48
+        h: 48
+      rows: 4
+      cols: 3
+      acceleration:
+        row: 200
+        col: 200
+      sprite:
+        row: 0
+        col: 1
+    - type: Minimap
+      pos:
+        x: right
+        y: top
+
+- id: one-f
+  type: Ship
+  collidable:
+    health: 50
+    damage: 100
+  pos:
+    x: center
+    y: bottom
+  speed:
+    up: 1.5
+    left: 2
+    right: 2
+    down: 1
+  components:
+    - type: Spritesheet
+      src: characters/one-f
+      size:
+        w: 58.4
+        h: 64.5
+      rows: 3
+      cols: 3
+      acceleration:
+        row: 200
+        col: 0
+      sprite:
+        row: 2
+        col: 1
+    - type: HealthBar
+      outer:
+        color: white
+        pos:
+          x: 0
+          y: 10
+        size:
+          w: 2
+          h: 7
+      inner:
+        color: red
+        pos:
+          x: 1
+          y: 9
+        size:
+          h: 5
+  projectiles:
+    - id: bullet
+      event: input:q
+    - id: missile
+      event: input:w
