@@ -1,0 +1,49 @@
+- id: 1st
+  type: Phase
+  entities:
+    - id: 1st-starfield
+      resource: backgrounds
+      method:
+        id: start
+    - id: 1st-parallax-a
+      resource: backgrounds
+      method:
+        id: start
+    - id: 1st-parallax-b
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f
+      resource: characters
+      method:
+        id: start
+    - id: asteroid
+      resource: enemies
+      method:
+        id: loop
+        interval: 3000
+    - id: starbase
+      resource: objects
+      method:
+        id: unique
+        interval: 20000
+    - id: joystick
+      resource: controls
+      method:
+        id: start
+
+- id: 2nd
+  type: Phase
+  entities:
+    - id: olive
+      resource: characters
+      method:
+        id: start
+    - id: house
+      resource: objects
+      method:
+        id: start
+    - id: joystick
+      resource: controls
+      method:
+        id: start
