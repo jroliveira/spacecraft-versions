@@ -1,0 +1,66 @@
+- id: loading-a
+  type: Scenario
+  backgroundColor: '#111'
+  size:
+    w: 540
+    h: 900
+  setup:
+    images:
+      - components/loading-a
+  components:
+    - type: Loading
+      src: components/loading-a
+      size:
+        w: 2500
+        h: 100
+      pos:
+        x: center
+        y: center
+      frame:
+        ticks: 10
+        total: 25
+
+- id: 1st
+  type: Scenario
+  backgroundColor: '#111'
+  size:
+    w: 540
+    h: 900
+  phase:
+    id: 1st
+  setup:
+    images:
+      - backgrounds/1st-parallax-a
+      - backgrounds/1st-parallax-b
+      - backgrounds/1st-starfield-a-vertical
+      - characters/one-f-a-vertical
+      - controls/cursor-a
+      - controls/joystick-a
+      - enemies/asteroid-a
+      - explosions/explosion-a-1
+      - explosions/explosion-a-2
+      - objects/starbase
+      - projectiles/bullet
+      - projectiles/missile-vertical
+    entities:
+      - id: explosion-a-1.1
+        resource: explosions
+      - id: explosion-a-2
+        resource: explosions
+      - id: explosion-a-3
+        resource: explosions
+
+- id: 2nd
+  type: Scenario
+  backgroundColor: '#F0EBE6'
+  size:
+    w: 540
+    h: 900
+  phase:
+    id: 2nd
+  setup:
+    images:
+      - characters/olive-a
+      - controls/cursor-a
+      - controls/joystick-a
+      - objects/starbase
