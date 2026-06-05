@@ -1,0 +1,47 @@
+- id: loading
+  type: Scenario
+  backgroundColor: '#111'
+  components:
+    - type: Loading
+      src: components/loading
+      size:
+        w: 2500
+        h: 100
+      pos:
+        x: center
+        y: center
+      frame:
+        ticks: 10
+        total: 25
+
+- id: 1st
+  type: Scenario
+  backgroundColor: '#111'
+  phase:
+    id: 1st
+  setup:
+    images:
+      - backgrounds/1st-starfield
+      - backgrounds/1st-parallax-a
+      - backgrounds/1st-parallax-b
+      - characters/one-f
+      - components/loading
+      - controls/joystick
+      - enemies/asteroid
+      - objects/starbase
+      - projectiles/bullet
+      - projectiles/laser
+      - projectiles/missile
+      - projectiles/missile-a
+
+- id: 2nd
+  type: Scenario
+  backgroundColor: '#F0EBE6'
+  phase:
+    id: 2nd
+  setup:
+    images:
+      - characters/olive
+      - components/loading
+      - controls/joystick
+      - objects/starbase

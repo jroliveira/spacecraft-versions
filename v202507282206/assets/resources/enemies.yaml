@@ -1,0 +1,32 @@
+- id: asteroid
+  type: Asteroid
+  collidable:
+    health: 10
+    damage: 20
+  speed:
+    down: 1.25
+  size:
+    w: 95
+    h: 93
+  components:
+    - type: Img
+      src: enemies/asteroid
+      size:
+        w: 95
+        h: 93
+    - type: HealthBar
+      outer:
+        color: white
+        pos:
+          x: 0
+          y: 10
+        size:
+          w: 2
+          h: 7
+      inner:
+        color: red
+        pos:
+          x: 1
+          y: 9
+        size:
+          h: 5

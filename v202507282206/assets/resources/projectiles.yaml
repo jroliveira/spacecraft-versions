@@ -1,0 +1,106 @@
+- id: bullet
+  type: SmartProjectile
+  collidable:
+    health: 1
+    damage: 3
+  speed:
+    up: 4.5
+  size:
+    w: 9
+    h: 8
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Img
+      src: projectiles/bullet
+      size:
+        w: 9
+        h: 8
+    - type: Trail
+      length: 500
+      maxDistance: 500
+      color: '#CCC'
+      width: 1
+      fadeIntensity: 0.3
+
+- id: laser
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 10
+  speed:
+    up: 3
+  size:
+    w: 39
+    h: 17
+  components:
+    - type: Img
+      src: projectiles/laser
+      size:
+        w: 39
+        h: 17
+
+- id: laser-a
+  type: SmartProjectile
+  collidable:
+    health: 1
+    damage: 7
+  speed:
+    up: 3
+  size:
+    w: 3
+    h: 3
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Trail
+      length: 150
+      maxDistance: 150
+      color: '#FFF'
+      width: 3
+      fadeIntensity: 0.3
+
+- id: missile
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 5
+  speed:
+    up: 6
+  size:
+    w: 51
+    h: 10
+  components:
+    - type: Img
+      src: projectiles/missile
+      size:
+        w: 51
+        h: 10
+
+- id: missile-a
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 5
+  speed:
+    up: 6
+  size:
+    w: 12
+    h: 18
+  components:
+    - type: Spritesheet
+      src: projectiles/missile-a
+      size:
+        w: 12
+        h: 18
+      rows: 1
+      cols: 7
+      sprite:
+        row: 0
+        col: 0
+    - type: Trail
+      length: 500
+      maxDistance: 500
+      color: '#CCC'
+      width: 1
+      fadeIntensity: 0.3
