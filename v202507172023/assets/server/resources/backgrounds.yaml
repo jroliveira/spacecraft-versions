@@ -1,0 +1,26 @@
+- name: starbase-phase
+  type: Background
+  pos:
+    x: -80
+    y: -80
+  components:
+    - type: Img
+      src: backgrounds/starbase
+  width: 540
+  height: 500
+  canvas:
+    width: 540
+    height: 900
+
+- name: first-phase
+  type: MovingBackground
+  pos:
+    y: 900
+  speed: 2.5
+  components:
+    - type: Parallax
+      src: backgrounds/starfield
+  height: 900
+  canvas:
+    width: 540
+    height: 900

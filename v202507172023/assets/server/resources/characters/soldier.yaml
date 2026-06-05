@@ -1,0 +1,30 @@
+type: Soldier
+collidable:
+  health: 50
+  damage: 100
+timeNextMove: 250
+width: 48
+height: 48
+sprite:
+  row: 0
+  col: 0
+pos:
+  x: 450
+  y: 470
+canvas:
+  width: 540
+  height: 900
+components:
+  - type: Spritesheet
+    src: characters/soldier
+    width: 32
+    height: 32
+  - type: Minimap
+    pos:
+      x: 850
+      y: 15
+speed:
+  up: 1
+  left: 1
+  right: 1
+  down: 1

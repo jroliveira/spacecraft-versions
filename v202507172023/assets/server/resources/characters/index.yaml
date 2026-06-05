@@ -1,0 +1,2 @@
+- !include soldier.yaml
+- !include ship.yaml

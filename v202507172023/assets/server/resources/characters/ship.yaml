@@ -1,0 +1,43 @@
+type: Ship
+collidable:
+  health: 50
+  damage: 100
+timeNextMove: 83
+height: 64.5
+width: 58.4
+sprite:
+  row: 2
+  col: 1
+pos:
+  x: 200
+  y: 830
+canvas:
+  width: 540
+  height: 900
+components:
+  - type: Spritesheet
+    src: characters/ship
+    width: 39
+    height: 43
+  - type: HealthBar
+    outer:
+      color: white
+      pos:
+        x: 0
+        y: 10
+      width: 2
+      height: 7
+    inner:
+      color: red
+      pos:
+        x: 1
+        y: 9
+      height: 5
+projectiles:
+  first: bullet
+  second: missile
+speed:
+  up: 2
+  left: 2
+  right: 2
+  down: 2

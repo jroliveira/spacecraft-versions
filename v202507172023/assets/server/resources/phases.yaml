@@ -1,0 +1,17 @@
+- name: first
+  type: FirstPhase
+  entities:
+    - id: first-phase
+      resource: backgrounds
+    - id: Ship
+      resource: characters
+
+- name: starbase
+  type: StarbasePhase
+  entities:
+    - id: starbase-phase
+      resource: backgrounds
+    - id: Soldier
+      resource: characters
+    - id: Door
+      resource: objects
