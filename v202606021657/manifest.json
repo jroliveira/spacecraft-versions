@@ -1,0 +1,28 @@
+{
+  "name": "Spacecraft",
+  "short_name": "SC",
+  "description": "Spacecraft.",
+  "theme_color": "#C1A8B2",
+  "display": "standalone",
+  "background_color": "#C1A8B2",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/assets/images/favicon@128.png",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/favicon@256.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "/assets/images/favicon@512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
