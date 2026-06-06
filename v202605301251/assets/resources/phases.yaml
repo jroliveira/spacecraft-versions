@@ -1,0 +1,99 @@
+- id: 1st
+  type: Phase
+  world:
+    w: 5760
+    h: 3240
+  spawn:
+    x: 2880
+    y: 1620
+  camera:
+    deadzoneW: 400
+    deadzoneH: 300
+    lookahead: 220
+    lerp: 0.09
+  entities:
+    - id: 1st-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-metal
+      resource: enemies
+      method:
+        id: scatter
+        count: 38
+        seed: 7
+        spacing: 260
+        margin: 220
+    - id: asteroid-energy
+      resource: enemies
+      method:
+        id: scatter
+        count: 26
+        seed: 23
+        spacing: 240
+        margin: 220
+    - id: asteroid-crystal
+      resource: enemies
+      method:
+        id: scatter
+        count: 14
+        seed: 41
+        spacing: 280
+        margin: 220
+    - id: pirate-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 7
+        seed: 59
+        spacing: 900
+        margin: 400
+    - id: pirate-fighter
+      resource: enemies
+      method:
+        id: scatter
+        count: 11
+        seed: 71
+        spacing: 800
+        margin: 400
+    - id: starbase
+      resource: objects
+      method:
+        id: unique
+        interval: 40000
+  components:
+    - type: SectorBorder
+      pos: { x: '0', y: '0' }
+      falloff: 700
+      color: '141,227,232'
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
+
+- id: 2nd
+  type: Phase
+  entities:
+    - id: olive-a
+      resource: characters
+      method:
+        id: start
+    - id: house
+      resource: objects
+      method:
+        id: start
+    - id: joystick-a
+      resource: controls
+      method:
+        id: start
+  components:
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
