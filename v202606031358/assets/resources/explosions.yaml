@@ -1,0 +1,155 @@
+- id: explosion-a-1
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 512
+    h: 512
+  animation:
+    duration: 800
+    loop: false
+    autoRemove: true
+  components:
+    - type: Spritesheet
+      src: explosions/explosion-a-1
+      size:
+        w: 512
+        h: 512
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
+
+- id: explosion-a-1.1
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 256
+    h: 256
+  animation:
+    duration: 800
+    loop: false
+    autoRemove: true
+  components:
+    - type: ProSpritesheet
+      src: explosions/explosion-a-1
+      size:
+        w: 256
+        h: 256
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
+
+- id: explosion-a-2
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 384
+    h: 384
+  animation:
+    duration: 1600
+    loop: false
+    autoRemove: true
+  components:
+    - type: ProSpritesheet
+      src: explosions/explosion-a-2
+      size:
+        w: 384
+        h: 384
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
+
+- id: explosion-a-3
+  type: Explosion
+  speed:
+    up: 0
+    down: 0
+    left: 0
+    right: 0
+  size:
+    w: 224
+    h: 224
+  animation:
+    duration: 800
+    loop: false
+    autoRemove: true
+  components:
+    - type: ProSpritesheet
+      src: explosions/explosion-a-3
+      size:
+        w: 224
+        h: 224
+      rows: 8
+      cols: 8
+      acceleration:
+        row: 100
+        col: 100
+      sprite:
+        row: 0
+        col: 0
+
+# --- Warp-in arrival VFX (procedural canvas, sibling of the explosions above). Spawned by
+#     the Phase when an enemy respawns or the player ship is rebuilt. `WarpField` reads the
+#     entity's progress 0..1 over `animation.duration`, then autoRemove fires entity:remove.
+
+# Ship warp: full hyperspace exit (converging streaks → flash → expanding shockwave).
+- id: warp-in-ship
+  type: WarpIn
+  size:
+    w: 160
+    h: 160
+  animation:
+    duration: 850
+    loop: false
+    autoRemove: true
+  components:
+    - type: WarpField
+      variant: ship
+      size:
+        w: 160
+        h: 160
+      color: '#aef4ff'
+
+# Rock warp: subtle materialisation (soft dust ring + shimmer + twinkling specks).
+- id: warp-in-rock
+  type: WarpIn
+  size:
+    w: 96
+    h: 96
+  animation:
+    duration: 800
+    loop: false
+    autoRemove: true
+  components:
+    - type: WarpField
+      variant: rock
+      size:
+        w: 96
+        h: 96
+      color: '#8de3e8'

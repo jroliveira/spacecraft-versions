@@ -1,0 +1,251 @@
+- id: loading-a
+  type: Scenario
+  backgroundColor: '#070b14'
+  size:
+    w: 1920
+    h: 1080
+  setup:
+    images:
+      - components/loading-a
+  components:
+    - type: Loading
+      src: components/loading-a
+      size:
+        w: 2500
+        h: 100
+      pos:
+        x: center
+        y: center
+      frame:
+        ticks: 10
+        total: 25
+
+- id: 1st
+  type: Scenario
+  backgroundColor: '#070b14'
+  size:
+    w: 1920
+    h: 1080
+  phase:
+    id: 1st
+  components:
+    # === Top-left cluster (sector + clock + droid pip — kept as user prefers) ===
+    - type: SectorTag
+      pos: { x: '24', y: '20' }
+      text: SECTOR · BELT-04
+      status: ok
+      recording: true
+    - type: Clock
+      pos: { x: '24', y: '46' }
+      day: 47
+      time: '03:24:18'
+      tick: true
+    - type: DroidPip
+      pos: { x: '24', y: '90' }
+      active: true
+      mode: ATTACK
+      charge: 0.72
+      label: DROID
+
+    # === Top-right — score sits just left of the minimap ===
+    - type: Score
+      pos: { x: '1480', y: '20' }
+      score: 142850
+      wave: 7
+      totalWaves: 12
+      multiplier: 3
+
+    # === Right edge — Contract expanded ===
+    - type: Contract
+      pos: { x: '1620', y: '200' }
+      expanded: true
+      width: 280
+
+    # === Floating toast (left, under banner) ===
+    - type: Toast
+      pos: { x: '24', y: '160' }
+      mode: stack
+      width: 320
+      autoDismiss: 6000
+      initial: { kind: ok, title: 'CONTRACT UPDATED', body: 'Checkpoint 3/5 reached.' }
+
+    # === Bottom-left log (aligned with bottom card cluster) ===
+    - type: EventLog
+      pos: { x: '24', y: '846' }
+      width: 460
+      maxRows: 6
+      entries:
+        - { t: '03:24:18', sev: info, text: 'Sweep cycle complete · 6 contacts logged' }
+        - { t: '03:24:02', sev: warn, text: 'Hostile signature · 92° · 780m' }
+        - { t: '03:23:51', sev: bad, text: 'Hull breach · sector 4 · auto-seal' }
+        - { t: '03:23:40', sev: info, text: 'Contract CTR-08F2 · checkpoint 3/5' }
+        - { t: '03:23:22', sev: ok, text: 'Droid back online' }
+        - { t: '03:22:08', sev: info, text: 'Asteroid mineral signature · Belt-04' }
+
+    # === Bottom-center cluster (A3 layout: HP card · Radar · Armaments card) ===
+    # Reference: docs/design/.../cockpit-refined.jsx CockpitAtmospheric().
+    # The three items sit at bottom:24 with gap:18, total ~746px wide centered.
+    # Panels are listed FIRST so they render BEHIND the widgets on top.
+
+    # Card 1 frame — Pilot (HP/Shields/XP). width:280, corners (brackets) on.
+    # height 184 (was 176) to fit the 4th row (XPBar) with even spacing + bottom padding.
+    - type: Panel
+      pos: { x: '584', y: '880' }
+      width: 280
+      height: 190
+      cut: md
+      corners: true
+
+    # Card 3 frame — Armaments. Same height as Card 1 to keep the flanking pair symmetric.
+    - type: Panel
+      pos: { x: '1054', y: '880' }
+      width: 280
+      height: 190
+      label: ARMAMENTS
+      cut: md
+      corners: true
+
+    # NOTE: radar has NO card wrapper in A3 — it's just the disc.
+
+    # Widgets on top of Card 1 (Pilot) — padding 14px 16px from card
+    - type: PilotCard
+      pos: { x: '600', y: '894' }
+      name: VANGUARD-07
+      sub: 'DRIFTER · ESS. ENG'
+      size: 38
+    - type: Health
+      pos: { x: '600', y: '944' }
+      value: 74
+      max: 100
+      label: HULL
+      size: md
+    - type: Shields
+      pos: { x: '600', y: '988' }
+      value: 4
+      max: 6
+      label: SHIELDS
+    # Pilot progression — LVL + XP bar. Values are live (AttributeSystem → player:state);
+    # the config numbers are placeholders overwritten on mount.
+    - type: XPBar
+      pos: { x: '600', y: '1030' }
+      width: 232
+
+    # Radar — standalone disc, no card wrapper
+    - type: RadarHud
+      pos: { x: 'center', y: '722' }
+      diameter: 150
+      label: RDR-01
+
+    # Widget on top of Card 3 (Armaments) — header takes ~24px, widget starts ~y:912
+    - type: Weapons
+      pos: { x: '1070', y: '918' }
+      active: pulse
+      bulletAmmo: 1
+      missileAmmo: 4
+      missileMax: 6
+      cooldown: 0.15
+
+    # === Bottom-right corner — VEL · FUEL · ALT inside small card ===
+    - type: Panel
+      pos: { x: '1680', y: '1004' }
+      width: 220
+      height: 52
+      cut: sm
+      corners: false
+    - type: SpeedReadout
+      pos: { x: '1692', y: '1018' }
+      vel: 240
+      velMax: 380
+      fuel: 82
+      alt: 1280
+
+    # === Damage arc overlay (Canvas, reacts to entity:damaged) ===
+    - type: DamageArc
+      pos: { x: '0', y: '0' }
+
+    # === World minimap with fog of war (flush top-right of the playfield) ===
+    - type: Minimap
+      pos: { x: right, y: top }
+      width: 240
+      height: 135
+      cellSize: 300
+      revealRadius: 1000
+  setup:
+    images:
+      - backgrounds/1st-parallax-a
+      - backgrounds/1st-parallax-b
+      - backgrounds/1st-starfield-a-vertical
+      - characters/one-f-a-vertical
+      - controls/cursor-a
+      - controls/joystick-a
+      - enemies/asteroid-a
+      - explosions/explosion-a-1
+      - explosions/explosion-a-2
+      - objects/starbase
+      - projectiles/bullet
+      - projectiles/missile-vertical
+    entities:
+      - id: explosion-a-1.1
+        resource: explosions
+      - id: explosion-a-2
+        resource: explosions
+      - id: explosion-a-3
+        resource: explosions
+
+- id: 2nd
+  type: Scenario
+  backgroundColor: '#F0EBE6'
+  size:
+    w: 640
+    h: 900
+  phase:
+    id: 2nd
+  components:
+    - type: ScoreWave
+      pos: { x: right, y: top }
+      score: 87210
+      wave: 4
+      totalWaves: 8
+      multiplier: 2
+      ops: OPS · GROUND-03
+    - type: RadarHud
+      pos: { x: '16', y: '40' }
+      diameter: 120
+      label: RDR-02
+    - type: CompassStrip
+      pos: { x: center, y: '110' }
+      width: 320
+    - type: HudHealthBar
+      pos: { x: '16', y: '744' }
+      size: { w: 340, h: 120 }
+      value: 0.42
+      max: 100
+      label: VITALS · WOUNDED
+      callsign: GHOST-03
+      shields: 3
+      shieldsMax: 6
+    - type: Joystick
+      pos: { x: '16', y: '776' }
+      diameter: 108
+      knobX: 0.25
+      knobY: -0.4
+      label: MOVE
+    - type: TouchButton
+      pos: { x: '454', y: '776' }
+      diameter: 70
+      label: F
+      tone: blue
+      sub: FIRE
+      pressed: true
+    - type: TouchButton
+      pos: { x: '372', y: '792' }
+      diameter: 52
+      label: GR
+      tone: red
+      sub: GRENADE
+  setup:
+    images:
+      - characters/olive-a
+      - controls/cursor-a
+      - controls/joystick-a
+      - objects/starbase
