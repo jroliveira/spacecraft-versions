@@ -1,0 +1,19 @@
+- id: ANv-9q
+  type: Radar
+  maxRadius: 400
+  sweepSpeed: 90
+  rangeFrac: 0.85
+  wedgeWidth: 94
+  components:
+    - type: Sweep
+      color: '#8DE3E8'
+      opacity: 0.45
+      pingFade: 2600
+
+- id: R2D2
+  type: Droid
+  autoFire:
+    cooldown: 1300
+    projectile:
+      id: bullet
+      count: 2
