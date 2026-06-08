@@ -1,0 +1,88 @@
+# Contract templates (seed). Loaded into the `contracts` store by setup() each boot.
+# The mutable progress/status lives in the separate `contract-save` store.
+#
+# ADR-24 (foundation) + ADR-25 (bulletin board): a POOL of hunt contracts. None is
+# auto-accepted — the player opens the Bulletin Board (key `B` / clicking the Contract
+# widget) and accepts one, which becomes the single active contract. Accepting another
+# abandons the previous (progress resets); completing one removes it from the board for
+# good (the `contract-save.completedIds` latch) and never re-pays.
+#
+# `objective.kind: kill` counts `entity:destroyed` whose entity `type` is in `targets`
+# (asteroids/projectiles/the player ship also fire that event — only these types count).
+# `reward` is a bonus on top of the per-kill bounty the pirates already grant.
+- id: clear-the-belt
+  title: Clear the Belt
+  client: KESSEN STATION · SECURITY
+  summary: Destroy pirate craft menacing the Belt-04 mining lanes.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 8
+  reward:
+    credits: 300
+    xp: 120
+  danger: med
+
+- id: drone-sweep
+  title: Drone Sweep
+  client: BELT-04 · MINER GUILD
+  summary: Knock out the recon drones casing our extraction sites.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+    count: 5
+  reward:
+    credits: 160
+    xp: 70
+  danger: low
+
+- id: fighter-cull
+  title: Fighter Cull
+  client: KESSEN STATION · SECURITY
+  summary: Break up the raider fighter wing harassing supply runs.
+  objective:
+    kind: kill
+    targets:
+      - Fighter
+    count: 6
+  reward:
+    credits: 420
+    xp: 180
+    resources:
+      metal: 20
+  danger: high
+
+- id: lane-patrol
+  title: Lane Patrol
+  client: VANGUARD DISPATCH
+  summary: Run a sweep of the trade lanes and clear any hostiles you find.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 12
+  reward:
+    credits: 560
+    xp: 240
+    resources:
+      energy: 15
+  danger: high
+
+- id: first-blood
+  title: First Blood
+  client: VANGUARD DISPATCH
+  summary: A starter bounty — take down a handful of pirates to prove your guns.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 3
+  reward:
+    credits: 90
+    xp: 40
+  danger: low
