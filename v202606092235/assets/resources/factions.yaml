@@ -1,0 +1,25 @@
+# Faction templates (seed). Loaded into the `factions` store by setup() each boot.
+# The mutable per-faction reputation lives in the separate `reputation-save` store.
+#
+# ADR-28 (Reputation & Factions v1): each faction holds a numeric reputation (-100..+100)
+# with the player. Completing a contract credits its client faction's reputation (`repReward`
+# in contracts.yaml); contracts gate behind a minimum (`repRequired`). v1 has NO cross-faction
+# propagation (matrix) and NO hub banishment — a contract's reputation affects only its own
+# client faction. The named tiers (Hostil/Neutro/Amigo/Aliado) are derived on the UI side.
+- id: federation
+  name: Federação
+  color: "#4cc4ff"
+  initialRep: 0
+
+- id: hauler-guild
+  name: Hauler Guild
+  color: "#7ee0b8"
+  initialRep: 0
+
+# Narratively antagonistic; starts neutral (no penalty applied in v1). No contracts seeded for
+# it yet — a designer adds them later by tagging a contract with `faction: syndicate`.
+- id: syndicate
+  name: Sindicato
+  color: "#d98cff"
+  hostile: true
+  initialRep: 0
