@@ -1,0 +1,59 @@
+# Player template (seed). Loaded into the `player` store by setup() each boot.
+# The mutable save lives in the separate `player-save` store and overrides this.
+#
+# xpTable / pointsTable are indexed by LEVEL (index 0 is an unused placeholder so that
+# index == level). The last index defines the max level.
+#   xpTable[level]    = cumulative XP required to *be* at that level
+#   pointsTable[level] = attribute points granted upon *reaching* that level
+- id: template
+  level: 1
+  xp: 0
+  # Blank-slate baseline: every attribute starts at 1 and only grows (action-RPG convention,
+  # GDD §5.4). Effects are computed from this floor (e.g. Pilotagem: coeff × (attr − pilotagemBaseline)),
+  # so a fresh pilot has no bonus and every spent point is pure gain. (Rebased from the d20-style 8–10
+  # anchor — see the ADR-19 tuning amendment.)
+  attributes:
+    vigor: 1
+    reflexo: 1
+    pilotagem: 1
+    tecnologia: 1
+    comando: 1
+    negociacao: 1
+  proficiencies:
+    - light-arms
+    - scout-ship
+  skills: []
+  unspentPoints: 0
+  #            L0 L1  L2   L3   L4   L5    L6    L7    L8    L9    L10   L11   L12   L13   L14   L15   L16    L17    L18    L19    L20
+  xpTable:    [0, 0,  100, 250, 450, 700,  1000, 1400, 1900, 2500, 3200, 4000, 4900, 5900, 7000, 8200, 9500,  10900, 12400, 14000, 15700]
+  pointsTable: [0, 0, 2,   2,   3,   2,    2,    3,    2,    2,    4,    2,    2,    3,    2,    2,    3,     2,     2,     4,     5]
+  # Pilotagem → ship speed. factor = 1 + (pilotagem − pilotagemBaseline) × pilotagemSpeedCoeff.
+  # Baseline 1 (the blank-slate floor) → a fresh pilot gets factor 1.0 (no change to the starting
+  # game-feel). The coeff is calibrated to preserve ~+30% at the cap: 0.30 / (attrMax − baseline)
+  # = 0.30 / 19 ≈ 0.0158 (was 0.03 over the old 10→20 span).
+  pilotagemSpeedCoeff: 0.0158
+  pilotagemBaseline: 1
+  # Reflexo → dash cooldown (ADR-36). factor = 1 − (reflexo − reflexoBaseline) × reflexoCooldownCoeff.
+  # Baseline 1 (blank-slate floor) → a fresh pilot gets factor 1.0 (full config cooldown). The coeff
+  # is calibrated to ~−40% at the cap: 0.40 / (attrMax − baseline) = 0.40 / 19 ≈ 0.0211.
+  reflexoCooldownCoeff: 0.0211
+  reflexoBaseline: 1
+  # Tecnologia → radar range efficiency (ADR-37 emenda · fatia 2). factor = 1 + clamp(coeff ×
+  # (tecnologia − tecnologiaBaseline), 0, tecnologiaRangeCap). Baseline 1 (blank-slate floor) → a
+  # fresh pilot gets ×1.0 (the equipped tier's raw range). The factor MULTIPLIES the equipped
+  # module's range ("extrair potencial do equipamento", GDD §5.4) — it doesn't conjure range from
+  # nothing. Modest by design: cap +15% at the maxed attribute (matches Negociação), kept below a
+  # tier jump (+20–25%) so buying hardware stays the big gain. coeff = 0.15 / 19 ≈ 0.0079.
+  tecnologiaRangeCoeff: 0.0079
+  tecnologiaBaseline: 1
+  tecnologiaRangeCap: 0.15
+  # Comando → droid auto-fire cadence (ADR-37 emenda · fatia 4). factor = clamp(1 −
+  # (comando − comandoBaseline) × comandoCooldownCoeff, 0.1, 1). Baseline 1 (blank-slate floor) →
+  # a fresh pilot gets factor 1.0 (the equipped tier's raw cooldown). The factor MULTIPLIES
+  # (shortens) the equipped droid tier's cooldown → faster fire ("extrair potencial do equipamento",
+  # GDD §5.4). Modest by design: cap ~−15% at the maxed attribute (matches Tecnologia/Negociação),
+  # kept below a tier jump (Mk I→II −23%, II→III −25%) so buying hardware stays the big gain.
+  # coeff = 0.15 / 19 ≈ 0.0079 (mirrors the Reflexo cooldown curve).
+  comandoCooldownCoeff: 0.0079
+  comandoBaseline: 1
+  attrMax: 20

@@ -1,0 +1,58 @@
+- id: house
+  type: House
+  collidable: true
+  pos:
+    x: center
+    y: top
+  components:
+    - type: Sprite
+      src: objects/house
+      size:
+        w: 250
+        h: 250
+
+- id: starbase
+  type: Starbase
+  collidable:
+    health: 999
+    damage: 0
+  pos:
+    x: center
+    y: top
+  components:
+    - type: Sprite
+      src: objects/starbase
+      size:
+        w: 250
+        h: 250
+
+- id: colony-kessen
+  type: Hub
+  subtype: colony
+  name: Kessen Outpost
+  # Owning faction (ADR-29): drives the reputation price modifier at this hub's market. Must
+  # match a `factions.yaml` id. Kessen is a Federation outpost.
+  faction: federation
+  # Fixed authored landmark in the 1st world (5760x3240, spawn at center 2880,1620): a short
+  # flight east-northeast of spawn — easy to find, far enough to require navigating.
+  pos:
+    x: 4100
+    y: 1100
+  # Center-to-center proximity (world px) within which docking becomes available. Comfortably
+  # larger than the hull half-extent so the prompt appears before the ship reaches the wall.
+  dockRange: 260
+  # Services offered when docked (ADR-27): the Hub Menu lists these (Bulletin Board + Market).
+  services:
+    - bulletin-board
+    - market
+  # Not part of the collision system: "solid" is handled by the piloting deceleration around the
+  # hull (Phase.obstacles → MovableBehavior), so the ship is slowed, not repelled.
+  components:
+    - type: StationHull
+      size:
+        w: 240
+        h: 240
+      spin: 0.08
+      palette:
+        hull: '#3a4a63'
+        accent: '#8de3e8'
