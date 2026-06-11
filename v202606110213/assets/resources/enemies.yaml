@@ -1,0 +1,233 @@
+# --- Legacy sprite-based asteroid. Kept for reference; no longer referenced by any phase.
+#     Superseded by the procedural asteroid-metal / -energy / -crystal below.
+- id: asteroid-a
+  type: Asteroid
+  # Passive obstacle: not picked up by radar, droid auto-fire or smart-missile targeting.
+  detectable: false
+  collidable:
+    health: 10
+    damage: 20
+  speed:
+    down: 1.25
+  size:
+    w: 95
+    h: 93
+  detonable:
+    explosion: explosion-a-3
+  components:
+    - type: Sprite
+      src: enemies/asteroid-a
+      size:
+        w: 95
+        h: 93
+
+# --- Procedural asteroids (pixel-art, seeded per position). Each carries a different ore,
+#     signalled by the `accent` speckle color. Passive obstacles: detectable: false.
+#     Swap `AsteroidRock` for a `Sprite` once raster art exists — nothing else changes.
+
+# Metal-bearing rock: large, tough, steel-gray speckles.
+- id: asteroid-metal
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 14
+    damage: 20
+  speed:
+    down: 0
+  size:
+    w: 92
+    h: 88
+  detonable:
+    explosion: explosion-a-3
+  # Mined by destruction: drops ore into ship cargo (no XP/credits — it's not a kill).
+  reward:
+    resources:
+      metal: 3
+  # Timed respawn at the original anchor; subtle "rock" materialisation VFX.
+  respawn:
+    delay: 15000
+    warp: warp-in-rock
+  components:
+    - type: AsteroidRock
+      size:
+        w: 92
+        h: 88
+      palette:
+        rock: '#5c5f66'
+        accent: '#c2cad6'
+      spin:
+        min: 0.05
+        max: 0.2
+
+# Energy-bearing rock: mid size, teal-green glowing veins.
+- id: asteroid-energy
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 10
+    damage: 18
+  speed:
+    down: 0
+  size:
+    w: 74
+    h: 76
+  detonable:
+    explosion: explosion-a-3
+  reward:
+    resources:
+      energy: 2
+  respawn:
+    delay: 15000
+    warp: warp-in-rock
+  components:
+    - type: AsteroidRock
+      size:
+        w: 74
+        h: 76
+      palette:
+        rock: '#46535b'
+        accent: '#5be6c4'
+      spin:
+        min: 0.08
+        max: 0.26
+
+# Crystal-bearing rock: small, rarer, violet crystal flecks.
+- id: asteroid-crystal
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 8
+    damage: 16
+  speed:
+    down: 0
+  size:
+    w: 60
+    h: 58
+  detonable:
+    explosion: explosion-a-3
+  reward:
+    resources:
+      crystal: 1
+  respawn:
+    delay: 15000
+    warp: warp-in-rock
+  components:
+    - type: AsteroidRock
+      size:
+        w: 60
+        h: 58
+      palette:
+        rock: '#544a66'
+        accent: '#c77dff'
+      spin:
+        min: 0.1
+        max: 0.3
+
+# --- Ship wreck: dropped where the PLAYER ship dies (ADR-20). An Asteroid at heart — a
+#     persistent obstacle that damages the player on contact and is phased through by pirates
+#     (Enemy-vs-Enemy collisions are ignored), but drawn as broken hull via the ShipWreck
+#     component. Positioned dynamically at the death point by Ship.spawnDebris (placeAt).
+#     detectable: false → invisible to radar/droid/missiles, like any asteroid.
+- id: ship-debris
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 30
+    damage: 18
+  speed:
+    down: 0
+  size:
+    w: 72
+    h: 72
+  detonable:
+    explosion: explosion-a-3
+  components:
+    - type: ShipWreck
+      size:
+        w: 72
+        h: 72
+      palette:
+        hull: '#6a7079'
+        accent: '#ff7a3c'
+
+# --- Pirate enemies (GDD §7). detectable: true → radar/minimap show them and the player's
+#     droid auto-fires at them. Procedural pixel-art via PirateShip (swap for Sprite later).
+
+# Drone: stationary guard post. Faces the player and fires ranged bolts within aggro range.
+- id: pirate-drone
+  type: Drone
+  detectable: true
+  collidable:
+    health: 12
+    damage: 8
+  speed:
+    up: 0
+  size:
+    w: 40
+    h: 40
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 25
+    credits: 15
+  # Timed respawn at the guard post; full ship warp-in VFX on arrival.
+  respawn:
+    delay: 8000
+    warp: warp-in-ship
+  # aggroRadius kept under the player's radar maxRadius (sensors.yaml: 400) so an engaging
+  # drone is always detected — closing the auto-fire / homing loop.
+  ai:
+    aggroRadius: 360
+  fire:
+    projectile: pirate-bolt
+    cooldown: 1100
+  components:
+    - type: PirateShip
+      variant: drone
+      size:
+        w: 40
+        h: 40
+      palette:
+        hull: '#7a3b3b'
+        accent: '#ff6a4a'
+
+# Fighter: rushes the player within leashRadius of its anchor, returns when the player flees.
+# Damage is by contact.
+- id: pirate-fighter
+  type: Fighter
+  detectable: true
+  collidable:
+    health: 34
+    damage: 14
+  # speed.up doubles as the fighter's max flight speed (see Fighter.physics).
+  speed:
+    up: 2.5
+    down: 2.5
+    left: 2.5
+    right: 2.5
+  size:
+    w: 58
+    h: 52
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 35
+    credits: 25
+  respawn:
+    delay: 12000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 380
+    leashRadius: 900
+  fire:
+    projectile: pirate-bolt
+    cooldown: 1500
+  components:
+    - type: PirateShip
+      variant: fighter
+      size:
+        w: 58
+        h: 52
+      palette:
+        hull: '#6e2f2f'
+        accent: '#ffb24a'
