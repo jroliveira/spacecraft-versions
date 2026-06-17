@@ -1,0 +1,99 @@
+# Hub market sell prices (GDD §5.6 economy sink · ADR-27). Loaded into the `market` store by
+# setup() each boot and read by the CargoSystem at load. Fixed prices in v1 (no supply/demand).
+#
+# Anchored to asteroid drop rarity (enemies.yaml): a metal rock drops 3, energy 2, crystal 1 —
+# so crystal is priced highest per unit. A full rock nets ~24-30₡, comparable to a pirate bounty
+# (15-25₡). `sell` = credits paid per unit.
+- id: metal
+  sell: 8
+- id: energy
+  sell: 14
+- id: crystal
+  sell: 30
+# Hull repair service (ADR-30 economy source/sink). `pricePerHp` = credits charged per HP
+# restored; a full repair costs `(maxHP - hp) × pricePerHp`, scaled inverse to reputation
+# (Aliado pays less, Hostil an ágio). ~2₡/HP keeps a full repair a fraction of a mining run.
+- id: repair
+  pricePerHp: 2
+# Seeker ammo rearm service (ADR-33 economy sink). `pricePerUnit` = credits charged per seeker
+# round restored; a full rearm costs `(max - ammo) × pricePerUnit`, scaled inverse to reputation
+# like the repair. ~10₡/round → a full 6-round rearm (~60₡) is roughly a couple of pirate bounties.
+- id: ammo
+  pricePerUnit: 10
+# Contract permit service (ADR-34 economy sink + 2ª fatia: difficulty scope). The permit is now
+# scoped to a faction AND a difficulty, so cost = `base[faction] × dangerMult[danger] × buyModifier`.
+# `prices` = the BASE (the `med` tier) credits per faction id — the hub sells only its own faction's
+# permit (`dockedFaction`), scaled inverse to reputation like repair/ammo. `dangerMult` scales the
+# base per difficulty (FÁCIL cheaper, DIFÍCIL pricier) — a global multiplier, not a per-faction
+# matrix. Priced as a meaningful credit goal: a permit is several mining runs / bounties.
+- id: permit
+  prices:
+    federation: 800
+    hauler-guild: 600
+    syndicate: 1000
+  dangerMult:
+    low: 0.6
+    med: 1.0
+    high: 1.6
+# Negociação attribute price modifier (ADR-35). Not a priced item — it tunes how the player's
+# Negociação skill shifts every market price: `pct = clamp(perPoint × (negociacao − baseline), 0, cap)`,
+# ADDED to the sell modifier and SUBTRACTED from the buy modifier (stacks additively with reputation).
+# `baseline: 1` = the blank-slate floor (a fresh pilot gets +0%); `perPoint × (attrMax − baseline)` =
+# 0.008 × 19 ≈ 0.15 hits the `cap` at the maxed attribute (20). Tunable here without code.
+- id: negotiation
+  perPoint: 0.008
+  baseline: 1
+  cap: 0.15
+# Radar module catalog (ADR-37 — ship modules, fatia 1). The radar is a tiered module bought at
+# the hub, gated by the Tecnologia attribute (techRequired = minimum Tecnologia to buy). Mk I is
+# the BASE (no entry — the Radar uses its own `sensors.yaml` maxRadius of 400). `maxRadius` is the
+# effective sweep radius at that tier; `price` is the base credits cost (× the rep/Negociação buy
+# modifier at purchase). Gates kept modest (Tecnologia competes with 5 other attributes for points).
+- id: radar
+  tiers:
+    - tier: 2
+      label: Mk II
+      maxRadius: 500
+      techRequired: 4
+      price: 700
+    - tier: 3
+      label: Mk III
+      maxRadius: 550
+      techRequired: 8
+      price: 2000
+# Droid module catalog (ADR-37 emenda · fatia 3). The auto-cannon droid is a tiered module bought
+# at the hub, gated by the Comando attribute (comandoRequired = minimum Comando to buy — the droid
+# is an "active defense" · GDD §5.4). Mk I is the BASE (no entry — the Droid uses its own
+# `sensors.yaml` autoFire.cooldown of 1300). `cooldown` is the effective fire cooldown in ms at that
+# tier (LOWER = faster); `price` is the base credits cost (× the rep/Negociação buy modifier).
+# Gates kept modest (Comando competes with 5 other attributes for points), mirroring the radar gates.
+- id: droid
+  droidTiers:
+    - tier: 2
+      label: Mk II
+      cooldown: 1000
+      comandoRequired: 4
+      price: 700
+    - tier: 3
+      label: Mk III
+      cooldown: 750
+      comandoRequired: 8
+      price: 2000
+# Hull module catalog (ADR-37 emenda · fatia 5). The hull is a tiered module bought at the hub, gated
+# by the Vigor attribute (vigorRequired = minimum Vigor to buy — Vigor = HP/resistance · GDD §5.4).
+# Mk I is the BASE (no entry — the Ship uses its own `characters.yaml` collidable.health of 50).
+# `maxHp` is the effective max HP at that tier; `price` is the base credits cost (× the rep/Negociação
+# buy modifier). Buying a tier raises the ceiling and fills the new capacity (the existing damage
+# stays — full repair is the paid sink · ADR-30). Gates/prices mirror the droid (Vigor 4/8, 700/2000).
+- id: hull
+  hullTiers:
+    - tier: 2
+      label: Mk II
+      maxHp: 75
+      vigorRequired: 4
+      price: 700
+    - tier: 3
+      label: Mk III
+      maxHp: 100
+      vigorRequired: 8
+      price: 2000

@@ -1,0 +1,217 @@
+# Contract templates (seed). Loaded into the `contracts` store by setup() each boot.
+# The mutable progress/status lives in the separate `contract-save` store.
+#
+# ADR-24 (foundation) + ADR-25 (bulletin board): a POOL of hunt contracts. None is
+# auto-accepted — the player opens the Bulletin Board (key `B` / clicking the Contract
+# widget) and accepts one, which becomes the single active contract. Accepting another
+# abandons the previous (progress resets); completing one removes it from the board for
+# good (the `contract-save.completedIds` latch) and never re-pays.
+#
+# `objective.kind: kill` counts `entity:destroyed` whose entity `type` is in `targets`
+# (asteroids/projectiles/the player ship also fire that event — only these types count).
+# `reward` is a bonus on top of the per-kill bounty the pirates already grant.
+#
+# ADR-28 (reputation): `faction` is the client faction id (factions.yaml); completing credits
+# `repReward` to it; the board gates the contract until reputation ≥ `repRequired`. A contract
+# with no faction/repRequired is ungated and grants no reputation.
+- id: clear-the-belt
+  title: Clear the Belt
+  client: KESSEN STATION · SECURITY
+  summary: Destroy pirate craft menacing the Belt-04 mining lanes.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 8
+  reward:
+    credits: 300
+    xp: 120
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 10
+
+- id: drone-sweep
+  title: Drone Sweep
+  client: BELT-04 · MINER GUILD
+  summary: Knock out the recon drones casing our extraction sites.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+    count: 5
+  reward:
+    credits: 160
+    xp: 70
+  danger: low
+  faction: hauler-guild
+  repRequired: 0
+  repReward: 5
+
+- id: fighter-cull
+  title: Fighter Cull
+  client: KESSEN STATION · SECURITY
+  summary: Break up the raider fighter wing harassing supply runs.
+  objective:
+    kind: kill
+    targets:
+      - Fighter
+    count: 6
+  reward:
+    credits: 420
+    xp: 180
+    resources:
+      metal: 20
+  danger: high
+  faction: federation
+  repRequired: 15
+  repReward: 12
+
+- id: lane-patrol
+  title: Lane Patrol
+  client: VANGUARD DISPATCH
+  summary: Run a sweep of the trade lanes and clear any hostiles you find.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 12
+  reward:
+    credits: 560
+    xp: 240
+    resources:
+      energy: 15
+  danger: high
+  faction: federation
+  repRequired: 30
+  repReward: 15
+
+- id: first-blood
+  title: First Blood
+  client: VANGUARD DISPATCH
+  summary: A starter bounty — take down a handful of pirates to prove your guns.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 3
+  reward:
+    credits: 90
+    xp: 40
+  danger: low
+  faction: federation
+  repRequired: 0
+  repReward: 8
+
+# --- ADR-25 emenda: prerequisite chain (contract A unlocks contract B) ---
+# `requires` lists contract ids that must be COMPLETED before this one appears UNLOCKED on the board
+# (until then it shows greyed + "REQUER: {título}"). The prereq is "contract X done" — it reuses the
+# persisted `completedIds`, no flag store needed. This chain BRANCHES off `first-blood` (two dependents)
+# and then continues, so the CADEIAS tree shows a fan-out + a deeper tier:
+#   first-blood ─┬─ proving-grounds ── veterans-trial
+#               └─ recon-sweep
+- id: proving-grounds
+  title: Proving Grounds
+  client: VANGUARD DISPATCH
+  summary: You drew first blood — now hold a lane and thin the raider pack.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 5
+  reward:
+    credits: 220
+    xp: 100
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 10
+  requires:
+    - first-blood
+
+- id: veterans-trial
+  title: Veteran's Trial
+  client: VANGUARD DISPATCH
+  summary: Final proof of the chain — break a full raider wing on your own.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 8
+  reward:
+    credits: 480
+    xp: 200
+    resources:
+      energy: 10
+  danger: high
+  faction: federation
+  repRequired: 0
+  repReward: 14
+  requires:
+    - proving-grounds
+
+# Branch sibling of `proving-grounds` — also unlocked by `first-blood`, so the chain fans out. Kept
+# at a comparable early-game weight to `proving-grounds` (a parallel, not a harder, follow-up).
+- id: recon-sweep
+  title: Recon Sweep
+  client: VANGUARD DISPATCH
+  summary: First blood drawn — now sweep the drift and thin the recon drones casing it.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+    count: 6
+  reward:
+    credits: 200
+    xp: 90
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 9
+  requires:
+    - first-blood
+
+# --- ADR-31: non-kill objectives ---
+# Mining: `objective.kind: mine` counts the (untagged, positive) `resource:changed` inflow of
+# `resource` while active — ore mined this session (asteroid drops), not pre-existing cargo. The
+# ore is NOT consumed (it stays in cargo to sell/deliver). A metal rock drops 3, so 10 ≈ 4 rocks.
+- id: prospect-run
+  title: Prospect Run
+  client: BELT-04 · MINER GUILD
+  summary: Crack open metal-bearing rocks and bank the ore for the Guild.
+  objective:
+    kind: mine
+    resource: metal
+    count: 10
+  reward:
+    credits: 120
+    xp: 60
+  danger: low
+  faction: hauler-guild
+  repRequired: 0
+  repReward: 6
+
+# Delivery: `objective.kind: deliver` consumes `count` of `resource` from cargo when the player
+# docks at `destHubId` (matches a hub id in objects.yaml — here Kessen Outpost). Partial
+# deliveries accumulate across docks; the ore is debited (handed over), not sold.
+- id: supply-kessen
+  title: Supply Run · Kessen
+  client: KESSEN STATION · LOGISTICS
+  summary: Haul refined metal to Kessen Outpost to restock the foundry.
+  objective:
+    kind: deliver
+    resource: metal
+    count: 8
+    destHubId: colony-kessen
+  reward:
+    credits: 200
+    xp: 80
+  danger: low
+  faction: federation
+  repRequired: 0
+  repReward: 7
