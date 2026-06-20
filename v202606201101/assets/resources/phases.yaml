@@ -1,0 +1,261 @@
+- id: 1st
+  type: Phase
+  world:
+    w: 5760
+    h: 3240
+  # Initial spawn: beside the sector's faction hub (you start at home base — every sector's hub sits
+  # at objects.yaml pos ~4100,1100), just clear of its dock range. A star-map travel arrival overrides
+  # this to the destination's jump gate (Phase.placeShipAtGate); respawn (death) also rebuilds here.
+  spawn:
+    x: 4100
+    y: 1550
+  camera:
+    deadzoneW: 400
+    deadzoneH: 300
+    lookahead: 220
+    lerp: 0.09
+  entities:
+    - id: 1st-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-metal
+      resource: enemies
+      method:
+        id: scatter
+        count: 38
+        seed: 7
+        spacing: 260
+        margin: 220
+    - id: asteroid-energy
+      resource: enemies
+      method:
+        id: scatter
+        count: 26
+        seed: 23
+        spacing: 240
+        margin: 220
+    - id: asteroid-crystal
+      resource: enemies
+      method:
+        id: scatter
+        count: 14
+        seed: 41
+        spacing: 280
+        margin: 220
+    - id: pirate-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 7
+        seed: 59
+        spacing: 900
+        margin: 400
+    - id: pirate-fighter
+      resource: enemies
+      method:
+        id: scatter
+        count: 11
+        seed: 71
+        spacing: 800
+        margin: 400
+    - id: starbase
+      resource: objects
+      method:
+        id: unique
+        interval: 40000
+    - id: colony-kessen
+      resource: objects
+      method:
+        id: start
+    - id: jump-gate
+      resource: objects
+      method:
+        id: start
+  components:
+    - type: SectorBorder
+      pos: { x: '0', y: '0' }
+      falloff: 700
+      color: '141,227,232'
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
+
+# === Faction sectors (MVP feature #4 · World backbone, Plano A) ===
+# Each sector's world: same size/camera as `1st`, own pre-placed content (asteroids + pirates via
+# scatter with distinct seeds, the faction hub via `start`). The jump gate is added per-phase in
+# Phase 3 (once the JumpGate entity is registered). SectorBorder color tints the sector per faction
+# identity (federation cyan / pioneers amber / syndicate magenta).
+- id: sector-pioneers
+  type: Phase
+  world:
+    w: 5760
+    h: 3240
+  # Initial spawn: beside the sector's faction hub (you start at home base — every sector's hub sits
+  # at objects.yaml pos ~4100,1100), just clear of its dock range. A star-map travel arrival overrides
+  # this to the destination's jump gate (Phase.placeShipAtGate); respawn (death) also rebuilds here.
+  spawn:
+    x: 4100
+    y: 1550
+  camera:
+    deadzoneW: 400
+    deadzoneH: 300
+    lookahead: 220
+    lerp: 0.09
+  entities:
+    - id: 1st-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-metal
+      resource: enemies
+      method:
+        id: scatter
+        count: 32
+        seed: 103
+        spacing: 260
+        margin: 220
+    - id: asteroid-energy
+      resource: enemies
+      method:
+        id: scatter
+        count: 30
+        seed: 127
+        spacing: 240
+        margin: 220
+    - id: asteroid-crystal
+      resource: enemies
+      method:
+        id: scatter
+        count: 12
+        seed: 151
+        spacing: 280
+        margin: 220
+    - id: pirate-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 6
+        seed: 173
+        spacing: 900
+        margin: 400
+    - id: pirate-fighter
+      resource: enemies
+      method:
+        id: scatter
+        count: 9
+        seed: 191
+        spacing: 800
+        margin: 400
+    - id: hub-pioneers
+      resource: objects
+      method:
+        id: start
+    - id: jump-gate
+      resource: objects
+      method:
+        id: start
+  components:
+    - type: SectorBorder
+      pos: { x: '0', y: '0' }
+      falloff: 700
+      color: '232,201,141'
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
+
+- id: sector-syndicate
+  type: Phase
+  world:
+    w: 5760
+    h: 3240
+  # Initial spawn: beside the sector's faction hub (you start at home base — every sector's hub sits
+  # at objects.yaml pos ~4100,1100), just clear of its dock range. A star-map travel arrival overrides
+  # this to the destination's jump gate (Phase.placeShipAtGate); respawn (death) also rebuilds here.
+  spawn:
+    x: 4100
+    y: 1550
+  camera:
+    deadzoneW: 400
+    deadzoneH: 300
+    lookahead: 220
+    lerp: 0.09
+  entities:
+    - id: 1st-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-metal
+      resource: enemies
+      method:
+        id: scatter
+        count: 28
+        seed: 211
+        spacing: 260
+        margin: 220
+    - id: asteroid-energy
+      resource: enemies
+      method:
+        id: scatter
+        count: 22
+        seed: 233
+        spacing: 240
+        margin: 220
+    - id: asteroid-crystal
+      resource: enemies
+      method:
+        id: scatter
+        count: 18
+        seed: 251
+        spacing: 280
+        margin: 220
+    - id: pirate-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 9
+        seed: 271
+        spacing: 900
+        margin: 400
+    - id: pirate-fighter
+      resource: enemies
+      method:
+        id: scatter
+        count: 13
+        seed: 293
+        spacing: 800
+        margin: 400
+    - id: hub-syndicate
+      resource: objects
+      method:
+        id: start
+    - id: jump-gate
+      resource: objects
+      method:
+        id: start
+  components:
+    - type: SectorBorder
+      pos: { x: '0', y: '0' }
+      falloff: 700
+      color: '232,141,201'
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32

@@ -1,0 +1,42 @@
+# Ship class presets (seed). Loaded into the `ships` store by setup() each boot.
+# The chosen class is persisted as `shipClass` in `ship-save` (ShipModuleSystem); its stats are
+# surfaced via `module:state.ship` (consumed by the Ship for speed/HP and the CargoSystem for the cap).
+#
+# MVP feature #3 (Ship Select · Scout/Hauler): the player picks one of two PRESET classes on a new
+# game (no editable loadout — upgrades happen in the hub Market in-game). The class differentiates
+# velocity + hull + cargo cap (the glass-cannon × tank tradeoff).
+#
+# Fields:
+#   maxHp:     Mk I (base) hull HP for the class — feeds `module:state.hull.maxHp` at the base tier
+#              (the Ship reads it for effective max health). Kept BELOW the Mk II hull catalog (75) so
+#              a hull upgrade never downgrades. Tunable; the balance pass (MVP #5) refines it.
+#   speedMult: multiplier applied to the base physics (accel + maxSpeed), composing with Pilotagem.
+#   cargoCap:  total cap over the 3 physical ores (metal+energy+crystal). Credits never count.
+#   bars:      display-only 0–5 bars for the select screen (velocidade/casco/carga).
+- id: scout
+  name: Scout
+  cls: CLASSE · INTERCEPTADOR
+  shape: scout
+  icon: ship
+  tagline: Rápida e frágil. Pra quem corre na frente.
+  maxHp: 35
+  speedMult: 1.25
+  cargoCap: 30
+  bars:
+    velocidade: 5
+    casco: 2
+    carga: 2
+
+- id: hauler
+  name: Hauler
+  cls: CLASSE · CARGUEIRO
+  shape: hauler
+  icon: storage
+  tagline: Lenta e resistente. Carrega o peso.
+  maxHp: 70
+  speedMult: 0.85
+  cargoCap: 120
+  bars:
+    velocidade: 2
+    casco: 4
+    carga: 5
