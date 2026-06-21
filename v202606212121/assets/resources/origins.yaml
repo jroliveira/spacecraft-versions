@@ -1,0 +1,81 @@
+# Origin templates (seed). Loaded into the `origins` store by setup() each boot.
+# The chosen origin is persisted as `originId` in `player-save`; its effects are baked into
+# `player-save.attributes` (the +2/+2 boosts) and `reputation-save` (the initial reputation).
+#
+# MVP feature #2 (Character Creation · NDD §6): the player picks one of three origins on a new
+# game. Only the effects with a ready system apply now — `boosts` (AttributeSystem) and `rep`
+# (ReputationSystem). The `soon` block (proficiência/item/contato/local) is honest FLAVOR shown on
+# the card with no mechanic yet (proficiency/item/NPC = Pós-MVP; start-hub = MVP item #4).
+#
+# Fields:
+#   boosts: attribute key (vigor/reflexo/pilotagem/tecnologia/comando/negociacao) → +N (added to the
+#           blank-slate floor, without consuming unspent points).
+#   rep:    faction id (federation/pioneers/syndicate) → starting reputation (-100..+100), SET
+#           absolute (no ally/rival propagation — it's an initial state, not a gain).
+#   icon:   a getIcon name (UI iconography). soon.location is flavor (the real start-hub is item #4).
+- id: miners-child
+  name: Filho de Mineradores
+  age: 19
+  icon: extractor
+  tag: CINTURÃO · ROTA DE CARGA
+  quote: O meu planeta ainda está lá. Tô esperando a próxima rota.
+  boosts:
+    vigor: 2
+    comando: 2
+  rep:
+    federation: 0
+    pioneers: 5
+    syndicate: 0
+  # Start sector (MVP feature #4): the Filho de Mineradores begins in the Pioneiros (pioneers)
+  # sector — matches the `soon.location` flavor ("Colônia Pioneira").
+  startSectorId: sector-pioneers
+  soon:
+    proficiency: Mineração
+    item: Ferramenta de mineração
+    contact: Tomás · primo
+    location: Colônia Pioneira
+
+- id: survivor
+  name: Sobrevivente
+  age: 17
+  icon: shield-cracked
+  tag: MUNDO PERDIDO · RESGATADO
+  quote: Lembro do céu vermelho na última noite.
+  boosts:
+    reflexo: 2
+    pilotagem: 2
+  rep:
+    federation: -3
+    pioneers: 2
+    syndicate: -3
+  # Start sector (MVP feature #4): the Sobrevivente ("Estação neutra" flavor, no clear faction) begins
+  # in the Federação sector — the lawful/neutral starter, and the only one reusing the original `1st`
+  # world (clarify 2026-06-18).
+  startSectorId: sector-federation
+  soon:
+    proficiency: Armas Leves
+    item: Pistola velha
+    contact: Marek · resgatou
+    location: Estação neutra
+
+- id: deserter
+  name: Desertor
+  age: 18
+  icon: datacell
+  tag: EX-CORPORATIVO · FORA DA LEI
+  quote: Estudei pra trabalhar lá. Falei pra minha mãe que ia. Não fui.
+  boosts:
+    tecnologia: 2
+    negociacao: 2
+  rep:
+    federation: -5
+    pioneers: 0
+    syndicate: 5
+  # Start sector (MVP feature #4): the Desertor begins in the Sindicato sector — matches the
+  # `soon.location` flavor ("Estação do Sindicato").
+  startSectorId: sector-syndicate
+  soon:
+    proficiency: Sistemas / Hacking
+    item: Datapad
+    contact: Veska · contrabandista
+    location: Estação do Sindicato

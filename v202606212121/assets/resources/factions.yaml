@@ -1,0 +1,42 @@
+# Faction templates (seed). Loaded into the `factions` store by setup() each boot.
+# The mutable per-faction reputation lives in the separate `reputation-save` store.
+#
+# ADR-28 (Reputation & Factions): each faction holds a numeric reputation (-100..+100) with the
+# player. Completing a contract credits its client faction's reputation (`repReward` in
+# contracts.yaml); contracts gate behind a minimum (`repRequired`). The named tiers
+# (Hostil/Neutro/Amigo/Aliado) are derived on the UI side.
+#
+# ADR-28 amendment (cross-faction propagation): `relations` is a DIRECTED matrix mapping another
+# faction id to a weight in [-1, 1] (positive = ally rises alongside, negative = rival falls). A
+# gain credited to a faction propagates ONE hop to each listed faction (`delta × weight`, no
+# cascade). Seeded at ±0.5 (half the direct gain). Tune freely — it is data-only.
+# Canonical names + colours (ADR-43, NDD §4): Federação Colonial / Comunidade dos Pioneiros /
+# Sindicato Vermelho. The `pioneers` id was renamed from the legacy `hauler-guild` (a misnomer — the
+# lore faction was always the Pioneiros). Colours: cyan (official/cold) / amber (frontier colony) /
+# red (the "Sindicato Vermelho" — distinct from the HUD danger coral #ff7180).
+- id: federation
+  name: Federação Colonial
+  color: "#4cc4ff"
+  initialRep: 0
+  relations:
+    pioneers: 0.5       # aliada comercial: sobe junto
+    syndicate: -0.5     # rival: desce
+
+- id: pioneers
+  name: Comunidade dos Pioneiros
+  color: "#e8c98d"
+  initialRep: 0
+  relations:
+    federation: 0.5
+    syndicate: -0.5
+
+# Narratively antagonistic; starts neutral. No contracts seeded for it yet — a designer adds them
+# later by tagging a contract with `faction: syndicate`. Its rep only moves via propagation today.
+- id: syndicate
+  name: Sindicato Vermelho
+  color: "#ff4d4d"
+  hostile: true
+  initialRep: 0
+  relations:
+    federation: -0.5
+    pioneers: -0.5

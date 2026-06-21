@@ -1,0 +1,159 @@
+# Per-sector visual identity (MVP #4 polish · emenda ADR-43, re-authored physics-driven 2026-06-21).
+# Each gameplay sector references its own spacefield so traveling FEELS like a different place. The
+# color and signature come from what the sector PHYSICALLY is (NDD §8): a metallic asteroid belt
+# (Halberd) / a green nursery of living worlds (Hesper) / a volcanic field (Kessen). The faction lives
+# in the BUILT layer (SectorBorder/hub), not the environment. The procedural Spacefield is shared.
+
+# Cinturão de Halberd — metallic asteroid belt (steel / cool-cyan; a debris belt seen edge-on).
+- id: 1st-spacefield
+  type: Background
+  speed:
+    down: 0
+  components:
+    - type: Spacefield
+      pos:
+        x: 0
+        y: 0
+      speed: 28
+      farDensity: 220
+      nearDensity: 70
+      planet: true
+      planetRadius: 300
+      seed: 7
+      palette:
+        gradient: ['#101822', '#080d15', '#020308']
+        nebula:
+          - { fx: 0.30, fy: 0.68, rx: 700, ry: 360, color: 'rgba(90,130,170,0.10)' }
+          - { fx: 0.74, fy: 0.30, rx: 560, ry: 360, color: 'rgba(110,160,190,0.10)' }
+        # The belt seen edge-on: a hazy stripe of speckled rock/metal dust (brighter so it reads).
+        band: { kind: dust, angle: -18, width: 540, color: '#aab4c0', density: 1200, glow: 0.5 }
+        # A cracked rocky planetoid (the belt's shattered parent) + a barren moon + Vael (icy world)
+        # as a small, distant pale-blue dot (lower parallax = farther).
+        planets:
+          - { radius: 300, parallax: 0.28, color: '#7a8390', glow: '#5a7488', fx: 0.7, fy: 0.55, kind: rock }
+          - { radius: 70, parallax: 0.22, color: '#9aa2ac', glow: '#9aa2ac', fx: 0.42, fy: 0.3, kind: rock }
+          - { radius: 95, parallax: 0.12, color: '#a8cce4', glow: '#cfe8ff', fx: 0.2, fy: 0.72, kind: ice }
+        starWarm: '#cfe2f2'
+
+# Fronteira de Hesper — green nursery of living worlds (verde + warm gold; the Milky Way river).
+- id: pioneers-spacefield
+  type: Background
+  speed:
+    down: 0
+  components:
+    - type: Spacefield
+      pos:
+        x: 0
+        y: 0
+      speed: 28
+      farDensity: 200
+      nearDensity: 70
+      planet: true
+      planetRadius: 300
+      seed: 113
+      palette:
+        gradient: ['#101814', '#080d0a', '#020403']
+        nebula:
+          - { fx: 0.30, fy: 0.72, rx: 720, ry: 380, color: 'rgba(232,180,120,0.13)' }
+          - { fx: 0.72, fy: 0.32, rx: 600, ry: 380, color: 'rgba(120,200,140,0.12)' }
+          - { fx: 0.55, fy: 0.85, rx: 480, ry: 260, color: 'rgba(220,140,160,0.08)' }
+        # The galactic band — a luminous, MEANDERING river of stars across the frontier sky (S-bends).
+        band:
+          {
+            kind: stars,
+            angle: 22,
+            width: 520,
+            color: '#ffe9c0',
+            density: 1100,
+            glow: 0.6,
+            curve: 0.01,
+            waves: 3,
+          }
+        # Living worlds: Hesper (ocean-green habitable, clouds) big + Lir (toxic forest, sickly green)
+        # farther back + a small grey moon.
+        planets:
+          - { radius: 300, parallax: 0.28, color: '#4f8f6a', glow: '#7fd0a0', fx: 0.68, fy: 0.5, kind: ocean }
+          - { radius: 150, parallax: 0.17, color: '#6f9a3a', glow: '#a8d860', fx: 0.27, fy: 0.32, kind: toxic }
+          - { radius: 60, parallax: 0.22, color: '#aab0a0', glow: '#aab0a0', fx: 0.5, fy: 0.74, kind: rock }
+        # Aurora — a soft shimmering green curtain of light over the living worlds.
+        auroras:
+          - { kind: curtain, color: '#80f0c0', fx: 0.34, fy: 0.3, width: 900, height: 640, intensity: 0.45, speed: 0.5 }
+        starWarm: '#ffe9b8'
+
+# Campos de Kessen — volcanic field (red-orange + violet dust; a belt of irradiated debris).
+- id: syndicate-spacefield
+  type: Background
+  speed:
+    down: 0
+  components:
+    - type: Spacefield
+      pos:
+        x: 0
+        y: 0
+      speed: 28
+      farDensity: 210
+      nearDensity: 72
+      planet: true
+      planetRadius: 320
+      seed: 211
+      palette:
+        # Mostly normal deep space (faint warm tint) — the RED lives in the nebula clouds, the star
+        # river, the volcanic worlds and the flare, NOT a flat wash over the whole sector.
+        gradient: ['#100a0c', '#070509', '#020103']
+        nebula:
+          - { fx: 0.30, fy: 0.70, rx: 700, ry: 380, color: 'rgba(200,70,50,0.16)' }
+          - { fx: 0.74, fy: 0.32, rx: 560, ry: 380, color: 'rgba(150,60,140,0.13)' }
+          - { fx: 0.58, fy: 0.85, rx: 480, ry: 260, color: 'rgba(255,120,60,0.09)' }
+        # The galactic band — a meandering star river (same as Hesper), tinted warm/red for Kessen.
+        band:
+          {
+            kind: stars,
+            angle: -14,
+            width: 520,
+            color: '#ffd0b4',
+            density: 1100,
+            glow: 0.5,
+            curve: 0.01,
+            waves: 3,
+          }
+        # Two volcanic worlds: a big near one (lava, glowing veins) + a smaller, dimmer, rocky-red one
+        # set FARTHER back (lower parallax = drifts less), for depth/perspective.
+        planets:
+          - { radius: 320, parallax: 0.28, color: '#9a3a28', glow: '#ff6a3a', fx: 0.62, fy: 0.55, kind: lava }
+          - { radius: 150, parallax: 0.15, color: '#6e2622', glow: '#c8503a', fx: 0.26, fy: 0.3, kind: rock }
+        # Irradiated murk swallowing the stars + a pulsing volcanic flare in the open murk (off the
+        # planets so it actually reads against the dark, not red-on-red).
+        haze: { color: '#4a1a14', density: 0.32 }
+        auroras:
+          - { kind: glow, color: '#ff7a40', fx: 0.38, fy: 0.4, width: 560, intensity: 0.7, speed: 0.8 }
+        starWarm: '#ffc8a8'
+
+- id: 1st-parallax-a
+  type: MovingBackground
+  speed:
+    down: 1
+  components:
+    - type: Parallax
+      src: backgrounds/1st-parallax-a
+      size:
+        h: 800
+
+- id: 1st-parallax-b
+  type: MovingBackground
+  speed:
+    down: 1
+  components:
+    - type: Parallax
+      src: backgrounds/1st-parallax-b
+      size:
+        h: 800
+
+- id: 1st-starfield-a-vertical
+  type: MovingBackground
+  speed:
+    down: 1
+  components:
+    - type: Parallax
+      src: backgrounds/1st-starfield-a-vertical
+      size:
+        h: 3091

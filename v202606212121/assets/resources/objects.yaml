@@ -1,0 +1,183 @@
+- id: starbase
+  type: Starbase
+  collidable:
+    health: 999
+    damage: 0
+  pos:
+    x: center
+    y: top
+  components:
+    - type: Sprite
+      src: objects/starbase
+      size:
+        w: 250
+        h: 250
+
+- id: colony-kessen
+  type: Hub
+  subtype: colony
+  # NDD canon (ADR-43): the Federation hub is Halberd-Central. The entity id stays `colony-kessen`
+  # (internal; referenced by contracts/encounters hubId) — only the display name changes.
+  name: Estação Halberd-Central
+  # Owning faction (ADR-29): drives the reputation price modifier at this hub's market. Must
+  # match a `factions.yaml` id. Kessen is a Federation outpost.
+  faction: federation
+  # Fixed authored landmark in the 1st world (5760x3240, spawn at center 2880,1620): a short
+  # flight east-northeast of spawn — easy to find, far enough to require navigating.
+  pos:
+    x: 4100
+    y: 1100
+  # Center-to-center proximity (world px) within which docking becomes available. Comfortably
+  # larger than the hull half-extent so the prompt appears before the ship reaches the wall.
+  dockRange: 260
+  # Services offered when docked (ADR-27): the Hub Menu lists these (Bulletin Board + Market +
+  # Terminal · ADR-38, the skill-check Terminal).
+  services:
+    - bulletin-board
+    - market
+    - terminal
+  # Not part of the collision system: "solid" is handled by the piloting deceleration around the
+  # hull (Phase.obstacles → MovableBehavior), so the ship is slowed, not repelled.
+  components:
+    - type: StationHull
+      size:
+        w: 240
+        h: 240
+      spin: 0.08
+      palette:
+        hull: '#3a4a63'
+        accent: '#8de3e8'
+
+# === Faction hubs (MVP feature #4 · World backbone, Plano A) ===
+# Placeholder docking hubs for the two new sectors, faction-tagged so the market prices by reputation
+# (ADR-29) and the board filters by faction (ADR-28) — they ALREADY differ from Kessen. Dedicated
+# per-hub content (own contracts/encounters) is Plano B. Positions are world coords inside each
+# sector's own phase world (phases.yaml). Palette tints the hull per faction identity.
+- id: hub-pioneers
+  type: Hub
+  subtype: colony
+  name: Colônia Verdejo
+  faction: pioneers
+  pos:
+    x: 4100
+    y: 1100
+  dockRange: 260
+  services:
+    - bulletin-board
+    - market
+    - terminal
+  components:
+    - type: StationHull
+      size:
+        w: 240
+        h: 240
+      spin: 0.07
+      palette:
+        hull: '#4a3f2e'
+        accent: '#e8c98d'
+
+- id: hub-syndicate
+  type: Hub
+  subtype: station
+  name: Refúgio Vermelho
+  faction: syndicate
+  pos:
+    x: 4100
+    y: 1100
+  dockRange: 260
+  services:
+    - bulletin-board
+    - market
+    - terminal
+  components:
+    - type: StationHull
+      size:
+        w: 240
+        h: 240
+      spin: 0.09
+      palette:
+        hull: '#4a2e3f'
+        accent: '#e88dc9'
+
+# === Jump gate (MVP feature #4 · World backbone) ===
+# The travel point: fly within dockRange + press [F] to open the star map (gate:docked → Game). One
+# shared config placed via `start` in every sector phase (each scenario load makes its own instance;
+# worlds are separate, so the same world coords are fine). Dedicated `GatePortal` art (a ring + glowing
+# event horizon · ADR-41) so it reads as a JUMP GATE, distinct from the hub's StationHull. Placed away
+# from the hub/spawn so reaching it requires navigating.
+- id: jump-gate
+  type: JumpGate
+  name: Portão de Salto
+  pos:
+    x: 1600
+    y: 2300
+  dockRange: 280
+  components:
+    - type: GatePortal
+      size:
+        w: 200
+        h: 200
+      spin: 0.16
+      palette:
+        ring: '#2e2a4a'
+        glow: '#b48dff'
+
+# === Survey beacons (POIs · MVP #6 · explore objective · emenda ADR-31) ===
+# Fixed, authored landmarks placed via the Phase `start` method. The Poi entity emits `poi:reached`
+# when the ship crosses `reachRadius`; an `explore` contract that targets this `id` advances. Passive
+# (no docking/collision). Procedural `SurveyBeacon` art (objective ring + ping + core), swappable for a
+# Sprite. Placed away from the spawn/hub/gate so reaching it requires navigating the sector.
+- id: poi-survey-alpha
+  type: Poi
+  name: Baliza de Survey Alfa
+  pos:
+    x: 900
+    y: 700
+  reachRadius: 220
+  components:
+    - type: SurveyBeacon
+      size:
+        w: 120
+        h: 120
+      palette:
+        ring: '#5ee7c4'
+        glow: '#8de3e8'
+      pulseSpeed: 0.8
+
+# Pioneers survey beacon (MVP #7 · explore contract `hesper-claim`). Placed in sector-pioneers, top-left
+# open space, away from spawn/hub/gate. Amber palette for the Pioneers frontier identity.
+- id: poi-hesper
+  type: Poi
+  name: Marco de Colônia · Hesper
+  pos:
+    x: 1000
+    y: 800
+  reachRadius: 220
+  components:
+    - type: SurveyBeacon
+      size:
+        w: 120
+        h: 120
+      palette:
+        ring: '#e8c98d'
+        glow: '#f3dba6'
+      pulseSpeed: 0.8
+
+# Syndicate survey beacon (MVP #7 · explore contract `ghost-route`). Placed in sector-syndicate,
+# bottom-right open space. Red palette for the Sindicato Vermelho identity.
+- id: poi-veil
+  type: Poi
+  name: Aproximação Cega · Véu
+  pos:
+    x: 5000
+    y: 2500
+  reachRadius: 220
+  components:
+    - type: SurveyBeacon
+      size:
+        w: 120
+        h: 120
+      palette:
+        ring: '#ff4d4d'
+        glow: '#ff8d8d'
+      pulseSpeed: 0.8

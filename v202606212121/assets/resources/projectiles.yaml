@@ -1,0 +1,199 @@
+- id: bullet
+  type: SmartProjectile
+  collidable:
+    health: 1
+    damage: 2
+  detonable:
+    explosion: explosion-a-1.1
+  pos:
+    x: 0
+    y: 20
+  speed:
+    up: 4.5
+  range: 520
+  size:
+    w: 9
+    h: 8
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Sprite
+      src: projectiles/bullet
+      size:
+        w: 9
+        h: 8
+    - type: Trail
+      length: 500
+      maxDistance: 500
+      color: '#CCC'
+      width: 1
+      fadeIntensity: 0.3
+
+- id: laser
+  type: SmartProjectile
+  collidable:
+    health: 1
+    damage: 7
+  detonable:
+    explosion: explosion-a-1.1
+  pos:
+    x: 0
+    y: 20
+  speed:
+    up: 3
+  range: 360
+  size:
+    w: 3
+    h: 3
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Trail
+      length: 75
+      maxDistance: 75
+      color: '#FFF'
+      width: 3
+      fadeIntensity: 0.3
+
+# Enemy ranged shot. Flies straight along the firing pirate's orientation (aimed at the
+# player). Trail-only visuals (warm red/orange) — no raster asset needed yet.
+- id: pirate-bolt
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 5
+  detonable:
+    explosion: explosion-a-1.1
+  pos:
+    x: 0
+    y: 30
+  speed:
+    up: 3.5
+  range: 420
+  size:
+    w: 6
+    h: 6
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Trail
+      length: 220
+      maxDistance: 220
+      color: '#ff7a3c'
+      width: 2
+      fadeIntensity: 0.35
+
+# === Faction enemy shots (ADR-42) — DumbProjectiles aimed along the firer's orientation, ===
+# trail-only visuals tinted to the faction. Identity comes from speed/damage + colour.
+
+# Federation volley: a precise, fast bolt (the patrol fires at a higher cadence — see fed-patrol).
+- id: fed-volley
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 4
+  detonable:
+    explosion: explosion-a-1.1
+  pos:
+    x: 0
+    y: 30
+  speed:
+    up: 4.5
+  range: 460
+  size:
+    w: 5
+    h: 5
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Trail
+      length: 200
+      maxDistance: 200
+      color: '#4cc4ff'
+      width: 2
+      fadeIntensity: 0.35
+
+# Syndicate bolt: fast and stinging — fits the raider's aggressive hit-and-run.
+- id: syn-bolt
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 6
+  detonable:
+    explosion: explosion-a-1.1
+  pos:
+    x: 0
+    y: 30
+  speed:
+    up: 4.2
+  range: 440
+  size:
+    w: 6
+    h: 6
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Trail
+      length: 230
+      maxDistance: 230
+      color: '#ff4d4d'
+      width: 2
+      fadeIntensity: 0.35
+
+# Pioneers bolt: slow but heavy — a defensive sentry that punishes if you linger.
+- id: pio-bolt
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 8
+  detonable:
+    explosion: explosion-a-1.1
+  pos:
+    x: 0
+    y: 30
+  speed:
+    up: 2.8
+  range: 380
+  size:
+    w: 7
+    h: 7
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Trail
+      length: 180
+      maxDistance: 180
+      color: '#e8c98d'
+      width: 3
+      fadeIntensity: 0.35
+
+- id: missile-vertical
+  type: DumbProjectile
+  collidable:
+    health: 1
+    damage: 5
+  detonable:
+    explosion: explosion-a-1.1
+  pos:
+    x: 0
+    y: 50
+  speed:
+    up: 6
+  range: 700
+  size:
+    w: 9
+    h: 51
+  trajectory:
+    curveIntensity: 1
+  components:
+    - type: Sprite
+      src: projectiles/missile-vertical
+      size:
+        w: 9
+        h: 51
+    - type: Trail
+      length: 500
+      maxDistance: 500
+      color: '#CCC'
+      width: 1
+      fadeIntensity: 0.3
