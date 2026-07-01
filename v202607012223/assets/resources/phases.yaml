@@ -1,0 +1,409 @@
+- id: 1st
+  type: Phase
+  world:
+    w: 5760
+    h: 3240
+  # Initial spawn: beside the sector's faction hub (you start at home base — every sector's hub sits
+  # at objects.yaml pos ~4100,1100), just clear of its dock range. A star-map travel arrival overrides
+  # this to the destination's jump gate (Phase.placeShipAtGate); respawn (death) also rebuilds here.
+  spawn:
+    x: 4100
+    y: 1550
+  camera:
+    deadzoneW: 400
+    deadzoneH: 300
+    lookahead: 220
+    lerp: 0.09
+  entities:
+    - id: 1st-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-metal
+      resource: enemies
+      method:
+        id: scatter
+        count: 38
+        seed: 7
+        spacing: 260
+        margin: 220
+    - id: asteroid-energy
+      resource: enemies
+      method:
+        id: scatter
+        count: 26
+        seed: 23
+        spacing: 240
+        margin: 220
+    - id: asteroid-crystal
+      resource: enemies
+      method:
+        id: scatter
+        count: 14
+        seed: 41
+        spacing: 280
+        margin: 220
+    # Unaligned pirates = the GUARANTEED threat baseline (combat balance pass round 2 · MVP #8 ·
+    # 2026-06-22). With allegiance (ADR-45) the owning faction is neutral/ally to most visitors and
+    # stops attacking, so the gray scavengers — hostile to everyone regardless of rep — are what keeps
+    # the home sector from feeling empty. Scaled by sector danger: med Federation = 10 (drone 4 / fighter
+    # 6). Spread across the huge world with ~360-380px aggro, so encounters are frequent, not a gauntlet.
+    - id: pirate-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 4
+        seed: 59
+        spacing: 900
+        margin: 400
+    - id: pirate-fighter
+      resource: enemies
+      method:
+        id: scatter
+        count: 6
+        seed: 71
+        spacing: 800
+        margin: 400
+    # Federation signature (ADR-42): patrollers on authored waypoint routes (one per route), away from
+    # the hub/spawn (4100,1100 / 4100,1550). They cruise the route until the player enters aggro. The
+    # owning faction dominates its sector (QA 2026-06-20), so there are several patrol routes.
+    - id: fed-patrol
+      resource: enemies
+      method:
+        id: patrol
+        routes:
+          - - { x: 1200, y: 900 }
+            - { x: 2400, y: 900 }
+            - { x: 2400, y: 1900 }
+            - { x: 1200, y: 1900 }
+          - - { x: 3200, y: 2200 }
+            - { x: 4400, y: 2200 }
+            - { x: 4400, y: 2800 }
+            - { x: 3200, y: 2800 }
+          - - { x: 2800, y: 400 }
+            - { x: 4200, y: 500 }
+            - { x: 5000, y: 1200 }
+            - { x: 3900, y: 1300 }
+          - - { x: 400, y: 1400 }
+            - { x: 1400, y: 1700 }
+            - { x: 1200, y: 2600 }
+            - { x: 300, y: 2400 }
+          - - { x: 2300, y: 1300 }
+            - { x: 3300, y: 1300 }
+            - { x: 3300, y: 2000 }
+            - { x: 2300, y: 2000 }
+    # Federation guard drones (ADR-42 emenda · 2ª fatia das silhuetas): static posts scattered across
+    # the sector, a second faction signature alongside the patrollers.
+    - id: fed-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 4
+        seed: 137
+        spacing: 800
+        margin: 400
+    # Escort convoy (MVP #6 · 2ª metade · ADR-44): the friendly ally is pre-placed dormant via `patrol`
+    # (one one-way route). It stays parked near the jump gate until the escort contract `escort-convoy-fed`
+    # is accepted, then travels gate (1600,2300) → Halberd-Central hub (4100,1100). Reaching the last
+    # waypoint emits escort:arrived → the contract completes. Destroyed en route → the contract fails.
+    - id: convoy-fed
+      resource: enemies
+      method:
+        id: patrol
+        routes:
+          - - { x: 1750, y: 2150 }
+            - { x: 2600, y: 1850 }
+            - { x: 3400, y: 1500 }
+            - { x: 4050, y: 1300 }
+    - id: starbase
+      resource: objects
+      method:
+        id: unique
+        interval: 40000
+    - id: colony-kessen
+      resource: objects
+      method:
+        id: start
+    - id: jump-gate
+      resource: objects
+      method:
+        id: start
+    # Survey beacon for explore contracts (MVP #6 · emenda ADR-31).
+    - id: poi-survey-alpha
+      resource: objects
+      method:
+        id: start
+  components:
+    - type: SectorBorder
+      pos: { x: '0', y: '0' }
+      falloff: 700
+      color: '141,227,232'
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
+
+# === Faction sectors (MVP feature #4 · World backbone, Plano A) ===
+# Each sector's world: same size/camera as `1st`, own pre-placed content (asteroids + pirates via
+# scatter with distinct seeds, the faction hub via `start`). The jump gate is added per-phase in
+# Phase 3 (once the JumpGate entity is registered). SectorBorder color tints the sector per faction
+# identity (federation cyan / pioneers amber / syndicate magenta).
+- id: sector-pioneers
+  type: Phase
+  world:
+    w: 5760
+    h: 3240
+  # Initial spawn: beside the sector's faction hub (you start at home base — every sector's hub sits
+  # at objects.yaml pos ~4100,1100), just clear of its dock range. A star-map travel arrival overrides
+  # this to the destination's jump gate (Phase.placeShipAtGate); respawn (death) also rebuilds here.
+  spawn:
+    x: 4100
+    y: 1550
+  camera:
+    deadzoneW: 400
+    deadzoneH: 300
+    lookahead: 220
+    lerp: 0.09
+  entities:
+    - id: pioneers-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-metal
+      resource: enemies
+      method:
+        id: scatter
+        count: 32
+        seed: 103
+        spacing: 260
+        margin: 220
+    - id: asteroid-energy
+      resource: enemies
+      method:
+        id: scatter
+        count: 30
+        seed: 127
+        spacing: 240
+        margin: 220
+    - id: asteroid-crystal
+      resource: enemies
+      method:
+        id: scatter
+        count: 12
+        seed: 151
+        spacing: 280
+        margin: 220
+    # Unaligned pirates = the GUARANTEED threat baseline (combat balance pass round 2 · MVP #8 ·
+    # 2026-06-22). The Pioneers sentries are neutral/ally to most visitors (no origin starts hostile to
+    # them), so the pirates carry the home-sector combat for the Filho de Mineradores who spawns here.
+    # Scaled by sector danger: low Pioneers = 8 (drone 3 / fighter 5) — the gentlest home (friendliest origin).
+    - id: pirate-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 3
+        seed: 173
+        spacing: 900
+        margin: 400
+    - id: pirate-fighter
+      resource: enemies
+      method:
+        id: scatter
+        count: 5
+        seed: 191
+        spacing: 800
+        margin: 400
+    # Pioneers signature (ADR-42): defensive sentries scattered as guard posts — the dominant presence
+    # in their own sector (QA 2026-06-20).
+    - id: pio-sentry
+      resource: enemies
+      method:
+        id: scatter
+        count: 10
+        seed: 197
+        spacing: 850
+        margin: 400
+    # Pioneers guard drones (ADR-42 emenda · 2ª fatia das silhuetas): static posts, a second faction
+    # signature alongside the sentries.
+    - id: pio-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 4
+        seed: 211
+        spacing: 800
+        margin: 400
+    # Escort convoy (MVP #7 · escort contract `escort-settlers`): pre-placed dormant via `patrol` (one-way
+    # gate→hub route, same geometry as convoy-fed since gate/hub share coords across sectors). Wakes when
+    # the escort contract is accepted; reaching the last waypoint completes it.
+    - id: convoy-pio
+      resource: enemies
+      method:
+        id: patrol
+        routes:
+          - - { x: 1750, y: 2150 }
+            - { x: 2600, y: 1850 }
+            - { x: 3400, y: 1500 }
+            - { x: 4050, y: 1300 }
+    - id: hub-pioneers
+      resource: objects
+      method:
+        id: start
+    - id: jump-gate
+      resource: objects
+      method:
+        id: start
+    # Survey beacon for the explore contract `hesper-claim` (MVP #7).
+    - id: poi-hesper
+      resource: objects
+      method:
+        id: start
+  components:
+    - type: SectorBorder
+      pos: { x: '0', y: '0' }
+      falloff: 700
+      color: '232,201,141'
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32
+
+- id: sector-syndicate
+  type: Phase
+  world:
+    w: 5760
+    h: 3240
+  # Initial spawn: beside the sector's faction hub (you start at home base — every sector's hub sits
+  # at objects.yaml pos ~4100,1100), just clear of its dock range. A star-map travel arrival overrides
+  # this to the destination's jump gate (Phase.placeShipAtGate); respawn (death) also rebuilds here.
+  spawn:
+    x: 4100
+    y: 1550
+  camera:
+    deadzoneW: 400
+    deadzoneH: 300
+    lookahead: 220
+    lerp: 0.09
+  entities:
+    - id: syndicate-spacefield
+      resource: backgrounds
+      method:
+        id: start
+    - id: one-f-a-vertical
+      resource: characters
+      method:
+        id: start
+    - id: asteroid-metal
+      resource: enemies
+      method:
+        id: scatter
+        count: 28
+        seed: 211
+        spacing: 260
+        margin: 220
+    - id: asteroid-energy
+      resource: enemies
+      method:
+        id: scatter
+        count: 22
+        seed: 233
+        spacing: 240
+        margin: 220
+    - id: asteroid-crystal
+      resource: enemies
+      method:
+        id: scatter
+        count: 18
+        seed: 251
+        spacing: 280
+        margin: 220
+    # Unaligned pirates = the GUARANTEED threat baseline (combat balance pass round 2 · MVP #8 ·
+    # 2026-06-22). The Syndicate raiders are NEUTRAL to the Desertor who spawns here (syn rep +5), so
+    # they no longer engage him — the pirates carry his home-sector combat. Scaled by sector danger:
+    # high Syndicate = 12 (drone 5 / fighter 7) — the grittiest home (the outlaw origin).
+    - id: pirate-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 5
+        seed: 271
+        spacing: 900
+        margin: 400
+    - id: pirate-fighter
+      resource: enemies
+      method:
+        id: scatter
+        count: 7
+        seed: 293
+        spacing: 800
+        margin: 400
+    # Syndicate signature (ADR-42): relentless raiders scattered across Kessen — the dominant presence
+    # in the high-danger sector (QA 2026-06-20).
+    - id: syn-raider
+      resource: enemies
+      method:
+        id: scatter
+        # Combat balance pass round 2 (MVP #8 · 2026-06-22): restored 10 → 12. The round-1 cut (14→10)
+        # protected a "fresh Desertor pilot" — but with allegiance (ADR-45) the Desertor is NEUTRAL to
+        # the Syndicate (syn rep +5), so the raiders never engage him. The count only matters now for
+        # visitors who are HOSTILE to the Syndicate (e.g. the Sobrevivente, or anyone who tanks syn rep),
+        # for whom this must stay the densest, hardest faction signature (high-danger sector). Contact
+        # stays 13 (a relentless rammer shouldn't one-combo any fresh ship, regardless of who it fights).
+        count: 12
+        seed: 307
+        spacing: 820
+        margin: 400
+    # Syndicate guard drones (ADR-42 emenda · 2ª fatia das silhuetas): static posts, a second faction
+    # signature alongside the raiders.
+    - id: syn-drone
+      resource: enemies
+      method:
+        id: scatter
+        count: 4
+        seed: 311
+        spacing: 800
+        margin: 400
+    # Escort convoy (MVP #7 · escort contract `veil-escort`): pre-placed dormant via `patrol` (one-way
+    # gate→hub route). Wakes when the escort contract is accepted; reaching the last waypoint completes it.
+    - id: convoy-syn
+      resource: enemies
+      method:
+        id: patrol
+        routes:
+          - - { x: 1750, y: 2150 }
+            - { x: 2600, y: 1850 }
+            - { x: 3400, y: 1500 }
+            - { x: 4050, y: 1300 }
+    - id: hub-syndicate
+      resource: objects
+      method:
+        id: start
+    - id: jump-gate
+      resource: objects
+      method:
+        id: start
+    # Survey beacon for the explore contract `ghost-route` (MVP #7).
+    - id: poi-veil
+      resource: objects
+      method:
+        id: start
+  components:
+    - type: SectorBorder
+      pos: { x: '0', y: '0' }
+      falloff: 700
+      color: '255,77,77'
+    - type: Cursor
+      src: controls/cursor-a
+      size:
+        w: 32
+        h: 32

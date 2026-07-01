@@ -1,0 +1,55 @@
+# Sector catalog (seed). Loaded into the `sectors` store by setup() each boot. MVP feature #4 (World
+# backbone · star map travel). Each sector IS a ScenarioConfig+PhaseConfig; traveling there =
+# loadScenario(scenarioId). The CURRENT sector persists in `world-save` (WorldSystem); this catalog
+# is just the data-only pool, re-seeded every boot.
+#
+# Fields:
+#   faction:    owning faction id (factions.yaml) — drives the hub identity + the origin start-sector.
+#   scenarioId: the scenarios.yaml id loaded when the ship jumps into this sector.
+#   x, y:       authored galaxy coords in 0..1 (star map fit-to-view + auto-curved hyperlanes + ETA).
+#   links:      hyperlane connections (sector ids) — adjacency-on-the-node; travel/pathfinding only
+#               follows these edges. The WorldSystem mirrors them (undirected). MVP feature #4 graph.
+#   danger:     low | med | high — descriptive (star map dossier); no mechanic in the v1.
+#
+# One sector per faction (decision · clarify 2026-06-18). Names anchored to the NDD §8 geography
+# (ADR-43 · 2026-06-20): Cinturão de Halberd (Federação) / Fronteira de Hesper (Pioneiros) / Campos de
+# Kessen (Sindicato). `sector-federation` reuses the original `1st` world; the other two are new (Plano
+# A backbone — placeholder hubs, real
+# content in Plano B). Origin start-sector: Mineradores→pioneers, Desertor→syndicate, Sobrevivente→
+# federation (set via `startSectorId` in origins.yaml, applied at game:ship-confirm).
+#
+# Topology = CHAIN (clarify 2026-06-19): federation — pioneers — syndicate. Exercises the real
+# multi-hop pathfinding (Fed→Syndicate is a 2-hop route via Pioneiros) + fog of war (Syndicate is
+# unknown from the Federation until Pioneiros is discovered). The galaxy grows with YAML only.
+- id: sector-federation
+  name: Cinturão de Halberd
+  faction: federation
+  scenarioId: '1st'
+  x: 0.18
+  y: 0.62
+  danger: med
+  links: [sector-pioneers]
+  hubName: Estação Halberd-Central
+  services: [Quadro de Avisos, Comércio, Oficina, Entreposto, Terminal]
+
+- id: sector-pioneers
+  name: Fronteira de Hesper
+  faction: pioneers
+  scenarioId: sector-pioneers
+  x: 0.5
+  y: 0.4
+  danger: low
+  links: [sector-federation, sector-syndicate]
+  hubName: Colônia Verdejo
+  services: [Quadro de Avisos, Comércio, Oficina, Entreposto, Terminal]
+
+- id: sector-syndicate
+  name: Campos de Kessen
+  faction: syndicate
+  scenarioId: sector-syndicate
+  x: 0.82
+  y: 0.58
+  danger: high
+  links: [sector-pioneers]
+  hubName: Refúgio Vermelho
+  services: [Quadro de Avisos, Comércio, Oficina, Entreposto, Terminal]

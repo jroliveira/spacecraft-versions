@@ -1,0 +1,376 @@
+# Encounter templates (seed). Loaded into the `encounters` store by setup() each boot.
+# The mutable resolved/seed state lives in the separate `encounter-save` store.
+#
+# Skill Checks (GDD §5.4 / NDD §11 · ADR-38): a hub Terminal hosts a narrative beat. Each
+# option may be a SKILL CHECK (`attr` + `dc`) — picking it rolls `d20 + attribute` vs `dc`,
+# branching `success`/`failure` — or a SAFE option (no `attr`/`dc`) that always takes its
+# `success` arm (a guaranteed, smaller payoff). The d20 is DETERMINISTIC per (encounter, option)
+# from a save seed, so reloading can't reroll a failure (anti-save-scum).
+#
+# DC ladder is re-scoped for the blank-slate attribute range (1..20, ADR-19 amendment): the roll
+# is d20(1..20) + attribute(1..20) = 2..40, so a check DC of ~18 is hard for a fresh pilot and
+# becomes reliable as Tecnologia grows. Tunable here — no code change.
+#
+# `hubId` binds the encounter to a hub's Terminal (matches an `objects.yaml` Hub id). Two encounters per
+# faction hub (Halberd-Central / Verdejo / Refúgio), each a skill check + a safe/memory option.
+#
+# NB (canon · Códice de Setores 2026-07-01): the Federation hubId `colony-kessen` is a LEGACY internal id
+# (from the original `1st`/Kessen scenario, reused as the Cinturão de Halberd sector) — the player never
+# sees it. The Federation hub is HALBERD-CENTRAL, not Kessen (Kessen = Syndicate). Player-facing prose here
+# says Halberd/Cinturão accordingly; renaming the entity id is out of scope (minor tech debt).
+- id: terminal-kessen
+  hubId: colony-kessen
+  order: 1
+  title: Terminal de Dados
+  prompt: >-
+    Um terminal de carga esquecido pisca num canto do hangar de Halberd-Central. O cofre de
+    dados está selado por uma camada de criptografia militar antiga — dentro, créditos
+    desviados e registros que alguém esqueceu de apagar. Ninguém está olhando.
+  options:
+    - id: hack
+      label: Hackear o cofre de dados
+      attr: tecnologia
+      dc: 18
+      success:
+        text: >-
+          Você desmonta a cifra camada por camada. O cofre cede e despeja créditos
+          e logs limpos direto no seu console — incluindo a chave de roteamento que a
+          Federação usa pra mover carga cinza pelo Cinturão.
+        reward:
+          credits: 260
+          xp: 40
+        # Knowledge flag (NDD §11.1/11.2): cracking the vault is what later UNLOCKS the broker's
+        # memory option below. Only the SUCCESS arm sets it — "you DID the thing".
+        flag: knows-kessen-cipher
+      failure:
+        text: >-
+          Um contador de tentativas dispara um alarme silencioso. A Federação registra
+          a invasão na sua ficha antes de você cortar a conexão.
+        penalty:
+          faction: federation
+          rep: 6
+    - id: report
+      label: Reportar o terminal à estação
+      success:
+        text: >-
+          Você entrega o terminal à segurança de Halberd-Central. Não é glamouroso, mas a
+          estação paga uma gorjeta honesta pela informação.
+        reward:
+          credits: 80
+
+# Encounter B — the MEMORY/KNOWLEDGE option (NDD §11.1/11.2). Same hub as A; the EncounterSystem's
+# emitForHub shows the first UNRESOLVED encounter, so A is seen first, then B once A is resolved.
+# B's `cipher` option is a no-roll BYPASS gated behind the `knows-kessen-cipher` flag that A's hack
+# success sets — locked-with-hint until then. The `bluff` check + the safe `walk` path always exist,
+# so failing/skipping A never blocks B (diretriz 7).
+- id: broker-kessen
+  hubId: colony-kessen
+  order: 2
+  title: Informante no Hangar
+  prompt: >-
+    Um contato encostado na sombra de um cargueiro te chama com um gesto curto. "Soube
+    que mexeram no cofre de dados da estação", ele murmura. "Se você sabe por onde a
+    Federação roteia a carga cinza por aqui, eu pago bem pela rota. Mas não tente me
+    enrolar — eu confiro."
+  options:
+    # MEMORY option — only resolvable if the player cracked the vault in A. Locked-with-hint
+    # otherwise. No `attr`/`dc` (no roll): a guaranteed bypass with the superior payoff.
+    - id: cipher
+      label: Entregar a chave de roteamento do cofre
+      requires:
+        flag: knows-kessen-cipher
+        hint: hackeou o cofre de Halberd-Central
+      success:
+        text: >-
+          Você recita a chave de roteamento que arrancou do cofre, sem hesitar. O
+          contato escuta, confere num datapad surrado e abre um sorriso raro. "Então
+          era verdade." Ele te paga o dobro do combinado e marca seu nome como gente
+          de confiança.
+        reward:
+          credits: 340
+          xp: 60
+    # CROSS-HUB MEMORY option (2026-07-01 · cadeia "Delação de rotas", Sindicato → Federação). Requires
+    # `knows-syndicate-routes`, SET at the SYNDICATE hub (`stash-syndicate` crack success). DUAL-USE of an
+    # existing flag: the same routes let you DEAL WITH the Syndicate (local `use-routes` at fence-syndicate)
+    # OR BETRAY them here (snitch to the Federation broker). No roll; superior payoff, BUT informing on the
+    # Syndicate costs Syndicate reputation (`penalty`). Known cosmetic: the CONHECIMENTO ledger's
+    # `consumerOf` lists only the first consumer of a flag — the TEIA tree draws both wires correctly.
+    - id: snitch-routes
+      label: Vender ao contato as rotas do Sindicato
+      requires:
+        flag: knows-syndicate-routes
+        hint: abriu o esconderijo da doca do Sindicato
+      success:
+        text: >-
+          Você despeja as rotas que arrancou do datapad do esconderijo — nomes de
+          balizas, janelas de passagem, os corredores cegos que o Sindicato jura que
+          ninguém conhece. O contato paga cada linha e repassa adiante. Quando a
+          Doca descobrir de onde vazou, seu nome vai estar no topo da lista negra.
+        reward:
+          credits: 320
+          xp: 55
+        penalty:
+          faction: syndicate
+          rep: 8
+    # CHECK option — bluff your way through without the knowledge. Negociação (social) vs DC.
+    - id: bluff
+      label: Blefar que conhece a rota
+      attr: negociacao
+      dc: 16
+      success:
+        text: >-
+          Você costura uma rota plausível com meias-verdades e confiança. O contato
+          fica na dúvida, mas o blefe segura — ele paga, desconfiado.
+        reward:
+          credits: 180
+          xp: 25
+      failure:
+        text: >-
+          O contato te deixa falar até o fim, depois cospe no chão. "Você não faz
+          ideia." Ele some no hangar e espalha que você é vendedor de fumaça. A
+          Federação ouve o eco.
+        penalty:
+          faction: federation
+          rep: 5
+    - id: walk
+      label: Recusar e seguir caminho
+      success:
+        text: >-
+          Você dá de ombros e volta pra nave. O contato encolhe os ombros de volta —
+          e te joga umas moedas só pra você esquecer que ele existe.
+        reward:
+          credits: 60
+
+# === Pioneiros · Entreposto Pioneiro (hub-pioneers · pioneers) ===
+# Plano B: the Pioneers' Terminal posts logistics/extraction beats. Each is a single skill check + a
+# safe fallback (the guild values steady hands). A failed check costs a little Guild reputation.
+- id: cargo-claim-pioneers
+  hubId: hub-pioneers
+  order: 1
+  title: Carga Órfã
+  prompt: >-
+    Uma pod de carga à deriva pisca um sinal de resgate fraco num campo de detritos
+    perto do entreposto. O manifesto está corrompido — pode ser sucata, pode ser uma
+    remessa cara que a Guilda deu por perdida. Recuperá-la exige costurar a nave por
+    entre as rochas lentas que cercam o cilindro.
+  options:
+    - id: thread
+      label: Costurar os detritos e rebocar a pod
+      attr: pilotagem
+      dc: 15
+      success:
+        text: >-
+          Você desliza entre as rochas com folga de centímetros, prende o cabo de reboque
+          e arrasta a pod pra fora limpa. Dentro: células de energia lacradas — e um datapad
+          de navegação com as rotas seguras da Guilda pelo campo. A Guilda paga a recuperação
+          sem pestanejar.
+        reward:
+          credits: 240
+          xp: 45
+          resources:
+            energy: 6
+        # Knowledge flag (MVP #7 · NDD §11.1/11.2): recovering the nav datapad is what later UNLOCKS the
+        # `known-lane` memory option in `convoy-pioneers`. Only the SUCCESS arm sets it.
+        flag: knows-pioneers-lane
+      failure:
+        text: >-
+          Um pulo de rocha que você não previu raspa o casco e a pod escapa do cabo,
+          girando pra dentro do campo. Você volta de mãos vazias — e a Guilda anota o
+          reboque malfeito.
+        penalty:
+          faction: pioneers
+          rep: 4
+    - id: flag-guild
+      label: Marcar a posição e avisar a Guilda
+      success:
+        text: >-
+          Você registra as coordenadas e repassa pro despacho da Guilda — deixa o reboque
+          pesado pra quem tem guincho. Não rende muito, mas é trabalho honesto.
+        reward:
+          credits: 70
+
+- id: convoy-pioneers
+  hubId: hub-pioneers
+  order: 2
+  title: Comboio Atrasado
+  prompt: >-
+    Um comboio de carga da Guilda está parado no setor, sem um piloto de ponta pra
+    abrir a rota. O capataz te encara: "Sabe puxar uma fila de cargueiros lentos por
+    um corredor apertado sem perder ninguém?" Os pilotos hesitam — falta alguém pra
+    dar a ordem.
+  options:
+    # MEMORY option (MVP #7) — resolvable only if the player recovered the orphan pod's nav datapad in
+    # `cargo-claim-pioneers` (flag knows-pioneers-lane). Locked-with-hint otherwise. No roll: a guaranteed
+    # superior payoff (you already know the safe lane). The comando check + safe tail-end always exist,
+    # so failing/skipping the pod recovery never blocks this beat.
+    - id: known-lane
+      label: Rotear o comboio pela rota recuperada
+      requires:
+        flag: knows-pioneers-lane
+        hint: recuperou o datapad de rotas da pod órfã
+      success:
+        text: >-
+          Você abre o datapad que tirou da pod órfã e traça a rota segura que a Guilda tinha
+          dado por perdida. O comboio segue a linha sem hesitar, atravessa o corredor sem um
+          arranhão e chega adiantado. O capataz reconhece o trajeto — e o seu nome com ele.
+        reward:
+          credits: 340
+          xp: 60
+    - id: take-command
+      label: Assumir o comando e abrir a rota
+      attr: comando
+      dc: 16
+      success:
+        text: >-
+          Você assume o canal, distribui as posições e impõe um ritmo que os cargueiros
+          conseguem segurar. O comboio atravessa o corredor coeso, sem um arranhão. O
+          capataz te paga a liderança — e marca seu nome como gente de confiança. E,
+          traçando a rota metro a metro, você memoriza o corredor seguro que a Guilda
+          guarda a sete chaves.
+        reward:
+          credits: 280
+          xp: 55
+        # Knowledge flag (cross-hub · 2026-07-01): leading the convoy taught you the Guild's guarded
+        # safe corridor. This SETS `knows-guild-corridor`, later consumed by the `sell-corridor` memory
+        # option in the SYNDICATE's `fence-syndicate` (another hub) — the first cross-hub flag chain.
+        flag: knows-guild-corridor
+      failure:
+        text: >-
+          Suas ordens se atropelam no rádio e dois cargueiros quebram a formação no pior
+          ponto. Ninguém se perde, mas a bagunça atrasa tudo de novo. O capataz assume o
+          canal de volta, irritado.
+        penalty:
+          faction: pioneers
+          rep: 4
+    - id: tail-end
+      label: Ficar na retaguarda e só escoltar
+      success:
+        text: >-
+          Você prefere segurar a retaguarda e deixar a liderança com a Guilda. É um papel
+          menor, mas o comboio chega — e pagam a escolta.
+        reward:
+          credits: 90
+
+# === Sindicato · Doca do Sindicato (hub-syndicate · syndicate) ===
+# Plano B: the Syndicate's Terminal posts grey-market beats. A skill check (Negociação / Tecnologia)
+# plus a safe walk-away. A failed check burns a little Syndicate standing — they remember.
+- id: fence-syndicate
+  hubId: hub-syndicate
+  # order 2 (MVP #7): the consumer of the knowledge flag must come AFTER its setter (`stash-syndicate`,
+  # order 1), mirroring the Federation terminal→broker order so the player can SET the flag first.
+  order: 2
+  title: O Atravessador
+  prompt: >-
+    Um atravessador te chama pra um canto da doca, abre uma maleta cheia de módulos
+    sem número de série e larga um preço de compra ridículo de baixo. "É pegar ou
+    largar", ele diz, sabendo que você sabe que vale o triplo. Dá pra empurrar.
+  options:
+    # MEMORY option (MVP #7) — resolvable only if the player cracked the dock stash in `stash-syndicate`
+    # (the datapad of routes · flag knows-syndicate-routes). Locked-with-hint otherwise. No roll: a
+    # guaranteed superior payoff (you can name the fence's own supply route). The negociação check + safe
+    # flat-deal always exist, so failing/skipping the stash never blocks this beat.
+    - id: use-routes
+      label: Citar a rota do datapad e fechar por dentro
+      requires:
+        flag: knows-syndicate-routes
+        hint: abriu o esconderijo da doca
+      success:
+        text: >-
+          Você larga, casual, o nome da rota que o atravessador acha que só ele conhece —
+          a que tirou do datapad do esconderijo. Ele empalidece, entende que você sabe de
+          onde vem a mercadoria, e fecha o dobro do preço só pra você não falar mais nada.
+        reward:
+          credits: 360
+          xp: 60
+    # CROSS-HUB MEMORY option (2026-07-01 · cadeia "O corredor da Guilda", Pioneiros → Sindicato).
+    # Requires `knows-guild-corridor`, SET at the PIONEERS hub (`convoy-pioneers` take-command success).
+    # No roll (guaranteed bypass, superior payoff) — BUT selling out the Guild's corridor costs Pioneiros
+    # reputation (`penalty` on the success arm; `applyOutcome` pays reward + penalty together). Locked-with-
+    # hint until the flag is held. The flag set is global, so the gate works across hubs (ADR-38 emenda).
+    - id: sell-corridor
+      label: Vender o corredor seguro da Guilda ao atravessador
+      requires:
+        flag: knows-guild-corridor
+        hint: liderou o comboio da Guilda pelo corredor seguro
+      success:
+        text: >-
+          Você desenha de memória o corredor que a Guilda esconde — cada baliza, cada
+          janela de passagem. O atravessador copia tudo, avalia o que vale uma rota
+          limpa pro contrabando, e te paga gordo. Lá longe, a Guilda vai sentir a
+          traição quando o Sindicato começar a cortar caminho pela casa deles.
+        reward:
+          credits: 360
+          xp: 60
+        penalty:
+          faction: pioneers
+          rep: 8
+    - id: haggle
+      label: Forçar a barganha por um preço justo
+      attr: negociacao
+      dc: 15
+      success:
+        text: >-
+          Você desmonta cada argumento dele com calma e cita os preços reais de três
+          docas diferentes. O atravessador range os dentes, mas dobra a oferta — e
+          guarda seu nome como alguém que não se engana fácil.
+        reward:
+          credits: 300
+          xp: 50
+      failure:
+        text: >-
+          Ele te deixa falar, depois ri baixo e fecha a maleta. "Achei que você entendia
+          do ramo." O negócio evapora — e ele espalha que você fala mais do que sabe.
+        penalty:
+          faction: syndicate
+          rep: 5
+    - id: flat-deal
+      label: Aceitar a oferta sem discutir
+      success:
+        text: >-
+          Você pega o preço de tabela e segue caminho. Não é o melhor negócio, mas é
+          rápido e ninguém fica te devendo.
+        reward:
+          credits: 100
+
+- id: stash-syndicate
+  hubId: hub-syndicate
+  # order 1 (MVP #7): the SETTER of the knowledge flag comes first so the player can crack the stash
+  # before the fence beat, where the `use-routes` memory option consumes the flag.
+  order: 1
+  title: Esconderijo
+  prompt: >-
+    Atrás de um painel solto num corredor morto da doca há um compartimento trancado
+    por uma fechadura eletrônica caseira — improvisada, mas teimosa. Quem escondeu isso
+    não voltou. Ninguém por perto.
+  options:
+    - id: crack
+      label: Arrombar a fechadura eletrônica
+      attr: tecnologia
+      dc: 16
+      success:
+        text: >-
+          Você curto-circuita o sensor e a fechadura cede com um clique surdo. Dentro,
+          um maço de créditos anônimos e um datapad com rotas que valem mais que o
+          dinheiro. O Sindicato aprova esse tipo de iniciativa.
+        reward:
+          credits: 320
+          xp: 55
+        # Knowledge flag (MVP #7) — the datapad of routes is what later UNLOCKS the `use-routes` memory
+        # option in `fence-syndicate`. Only the SUCCESS arm sets it.
+        flag: knows-syndicate-routes
+      failure:
+        text: >-
+          A fechadura dispara um choque defensivo que queima sua ferramenta e trava de
+          vez. Pior: alguém do Sindicato te vê mexendo onde não devia, e a história
+          corre pela doca.
+        penalty:
+          faction: syndicate
+          rep: 5
+    - id: leave-it
+      label: Deixar como está e seguir
+      success:
+        text: >-
+          Você recoloca o painel e segue caminho — quem esconde assim costuma voltar
+          armado. Um informante te paga umas moedas só pela posição do esconderijo.
+        reward:
+          credits: 80

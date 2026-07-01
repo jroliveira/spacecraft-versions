@@ -1,0 +1,548 @@
+# Contract templates (seed). Loaded into the `contracts` store by setup() each boot.
+# The mutable progress/status lives in the separate `contract-save` store.
+#
+# ADR-24 (foundation) + ADR-25 (bulletin board): a POOL of hunt contracts. None is
+# auto-accepted — the player opens the Bulletin Board (docking at a hub · ADR-26) and
+# accepts contracts, which are added to the active slots. Completing one removes it from
+# the board for good (the `contract-save.completedIds` latch) and never re-pays.
+#
+# `objective.kind: kill` counts `entity:destroyed` whose entity `type` is in `targets`
+# (asteroids/projectiles/the player ship also fire that event — only these types count).
+# `reward` is a bonus on top of the per-kill bounty the pirates already grant.
+#
+# ADR-28 (reputation): `faction` is the client faction id (factions.yaml); completing credits
+# `repReward` to it; the board gates the contract until reputation ≥ `repRequired`. A contract
+# with no faction/repRequired is ungated and grants no reputation.
+#
+# ADR-41 emenda (Plano B · hub-dedicated content): `hubId` anchors the contract to a hub's Bulletin
+# Board (matches a `HubConfig.id` in objects.yaml), mirroring `EncounterSpec.hubId`. The board lists
+# only the DOCKED hub's contracts — each faction hub shows its OWN offers instead of the global pool.
+# A contract with no `hubId` is posted at every hub. The Quest Log + tracked widget stay global.
+#
+# Flavor-pass (2026-07-01 · Códice de Setores): title/client/summary re-voiced so each contract carries
+# its sector's "sentir" (docs/game-design/codice-de-setores.md) — Halberd/Fed = cold & procedural
+# ("you're replaceable"), Hesper/Pioneers = warm neighbourly ("we remember"), Kessen/Syndicate =
+# uncomfortable complicity ("acolhe e cobra"). Only player-facing prose changed; mechanics untouched.
+# NB: the Federation hubId `colony-kessen` is a LEGACY internal id (from the original `1st`/Kessen
+# scenario, reused as the Halberd sector) — the player never sees it; the Fed client strings are now
+# correctly HALBERD-CENTRAL (renaming the entity id is out of scope · minor tech debt).
+
+# === Federação · Estação Halberd-Central (hubId legado: colony-kessen) ===
+- id: clear-the-belt
+  title: Limpar o Cinturão
+  client: HALBERD-CENTRAL · SEGURANÇA
+  summary: Elementos hostis nas rotas de mineração do Cinturão. Neutralize oito. A Federação classifica, você executa — o resto é papelada nossa.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 8
+  reward:
+    credits: 300
+    xp: 120
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 10
+  hubId: colony-kessen
+
+- id: fighter-cull
+  title: Abate de Caças
+  client: HALBERD-CENTRAL · SEGURANÇA
+  summary: Uma ala de caças assedia os comboios de suprimento. Seis baixas confirmadas encerram o contrato. Sem heroísmo — só o número.
+  objective:
+    kind: kill
+    targets:
+      - Fighter
+    count: 6
+  reward:
+    credits: 420
+    xp: 180
+    resources:
+      metal: 20
+  danger: high
+  faction: federation
+  repRequired: 15
+  repReward: 12
+  hubId: colony-kessen
+
+# Exploration objective (MVP #6 · emenda ADR-31): reach the survey beacon `poi-survey-alpha` in the
+# Cinturão de Halberd sector. Tracked by the `poi:reached` event; no cargo/kills — just navigate there.
+- id: survey-belt-04
+  title: Vistoriar o Cinturão
+  client: HALBERD-CENTRAL · OPERAÇÕES
+  summary: Uma baliza de survey no cinturão parou de reportar. Voe até lá e registre uma leitura nova. Trabalho de rotina; a Federação só quer a planilha em dia.
+  objective:
+    kind: explore
+    poiId: poi-survey-alpha
+    count: 1
+  reward:
+    credits: 180
+    xp: 90
+  danger: low
+  faction: federation
+  repRequired: 0
+  repReward: 8
+  hubId: colony-kessen
+
+# Escort objective (MVP #6 · 2ª metade · ADR-44): protect the friendly convoy `convoy-fed` as it
+# travels from the jump gate to Halberd-Central. Tracked by `escort:arrived`; FAILS if the convoy is
+# destroyed (the system's first failure path — returns to the board, no rep penalty).
+- id: escort-convoy-fed
+  title: Escoltar o Comboio
+  client: HALBERD-CENTRAL · LOGÍSTICA
+  summary: Comboio oficial parado no portão — protocolo exige escolta armada. Ele anda com você ao lado; entregue-o intacto em Halberd-Central. Perdas contam contra o seu registro.
+  objective:
+    kind: escort
+    escortId: convoy-fed
+    count: 1
+  reward:
+    credits: 320
+    xp: 150
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 12
+  hubId: colony-kessen
+
+- id: lane-patrol
+  title: Patrulha de Rota
+  client: DESPACHO VANGUARDA
+  summary: Varra as rotas comerciais e depure os hostis. Doze baixas. Você não vai saber por que estavam ali, e a Federação não vai te contar.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 12
+  reward:
+    credits: 560
+    xp: 240
+    resources:
+      energy: 15
+  danger: high
+  faction: federation
+  repRequired: 30
+  repReward: 15
+  hubId: colony-kessen
+
+- id: supply-kessen
+  title: Comboio de Suprimentos · Cinturão
+  client: HALBERD-CENTRAL · LOGÍSTICA
+  summary: Transporte metal refinado até Halberd-Central para reabastecer a fundição. Rota autorizada, carga manifestada. Entregue e assine na saída.
+  objective:
+    kind: deliver
+    resource: metal
+    count: 8
+    destHubId: colony-kessen
+  reward:
+    credits: 200
+    xp: 80
+  danger: low
+  faction: federation
+  repRequired: 0
+  repReward: 7
+  hubId: colony-kessen
+
+# Mining contract (MVP #7) — gives the Federation board coverage of the `mine` objective (it had
+# kill/explore/escort/deliver but no mine). Bank refined metal for the Halberd-Central foundry quota.
+- id: foundry-quota
+  title: Cota da Fundição
+  client: HALBERD-CENTRAL · INDÚSTRIA
+  summary: A linha da fundição roda por cota e a cota não espera. Minere metal refinado e deposite. Bateu a meta, contrato fechado — nem antes, nem elogio depois.
+  objective:
+    kind: mine
+    resource: metal
+    count: 12
+  reward:
+    credits: 240
+    xp: 95
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 7
+  hubId: colony-kessen
+
+# --- ADR-25 emenda: prerequisite chain (contract A unlocks contract B) ---
+# `requires` lists contract ids that must be COMPLETED before this one appears UNLOCKED on the board
+# (until then it shows greyed + "REQUER: {título}"). The prereq is "contract X done" — it reuses the
+# persisted `completedIds`, no flag store needed. This chain BRANCHES off `first-blood` (two dependents)
+# and then continues, so the CADEIAS tree shows a fan-out + a deeper tier:
+#   first-blood ─┬─ proving-grounds ── veterans-trial
+#               └─ recon-sweep
+# The whole chain is posted at Halberd-Central (colony-kessen), so the Federation hub's CADEIAS tab shows it.
+- id: first-blood
+  title: Primeiro Sangue
+  client: DESPACHO VANGUARDA
+  summary: Contrato de entrada, pagamento tabelado. Abata três hostis e registre. Não precisamos do seu nome — só do número do abate.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 3
+  reward:
+    credits: 90
+    xp: 40
+  danger: low
+  faction: federation
+  repRequired: 0
+  repReward: 8
+  hubId: colony-kessen
+
+- id: proving-grounds
+  title: Campo de Provas
+  client: DESPACHO VANGUARDA
+  summary: Tirou o primeiro sangue. Agora segure uma rota e rareie a matilha — cinco baixas. A Federação anota quem entrega; é só isso que ela anota.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 5
+  reward:
+    credits: 220
+    xp: 100
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 10
+  requires:
+    - first-blood
+  hubId: colony-kessen
+
+- id: veterans-trial
+  title: Prova do Veterano
+  client: DESPACHO VANGUARDA
+  summary: Última prova da série — quebre uma ala inteira sozinho. Oito baixas. Passou, seu número sobe uma faixa no sistema. É o que a Federação chama de reconhecimento.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 8
+  reward:
+    credits: 480
+    xp: 200
+    resources:
+      energy: 10
+  danger: high
+  faction: federation
+  repRequired: 0
+  repReward: 14
+  requires:
+    - proving-grounds
+  hubId: colony-kessen
+
+# Branch sibling of `proving-grounds` — also unlocked by `first-blood`, so the chain fans out. Kept
+# at a comparable early-game weight to `proving-grounds` (a parallel, not a harder, follow-up).
+- id: recon-sweep
+  title: Varredura de Reconhecimento
+  client: DESPACHO VANGUARDA
+  summary: Drones de reconhecimento vigiam a deriva e alguém quer isso limpo. Seis. Não pergunte de quem eram os olhos — a resposta não vem no contrato.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+    count: 6
+  reward:
+    credits: 200
+    xp: 90
+  danger: med
+  faction: federation
+  repRequired: 0
+  repReward: 9
+  requires:
+    - first-blood
+  hubId: colony-kessen
+
+# === Pioneiros · Colônia Verdejo (hub-pioneers · pioneers) ===
+# The Guild posts logistics + extraction work: clearing drones off extraction sites, banking ore,
+# and hauling power cells to its own dock. Moved here from Kessen (these were always pioneers ·
+# Plano B relocates them to the Pioneers hub) + one new delivery contract for identity.
+- id: drone-sweep
+  title: Varredura de Drones
+  client: COLÔNIA VERDEJO · GUILDA
+  summary: Uns drones ficaram rondando nossos sítios e o pessoal tá nervoso de sair pra lavra. Derruba eles pra gente? A gente agradece — e a gente lembra.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+    count: 5
+  reward:
+    credits: 160
+    xp: 70
+  danger: low
+  faction: pioneers
+  repRequired: 0
+  repReward: 5
+  hubId: hub-pioneers
+
+# Mining: `objective.kind: mine` counts the (untagged, positive) `resource:changed` inflow of
+# `resource` while active — ore mined this session (asteroid drops), not pre-existing cargo. The
+# ore is NOT consumed (it stays in cargo to sell/deliver). A metal rock drops 3, so 10 ≈ 4 rocks.
+- id: prospect-run
+  title: Garimpo
+  client: GUILDA PIONEIRA · LOGÍSTICA
+  summary: As rochas com metal tão ali de graça, só falta braço. Quebra umas e deposita com a gente — a Guilda divide direitinho. Ajuda hoje, ajuda amanhã.
+  objective:
+    kind: mine
+    resource: metal
+    count: 10
+  reward:
+    credits: 120
+    xp: 60
+  danger: low
+  faction: pioneers
+  repRequired: 0
+  repReward: 6
+  hubId: hub-pioneers
+
+# New (Plano B): a delivery to the Pioneers' own dock — power cells for the convoy line. Delivery
+# consumes `count` energy from cargo when docking at `destHubId` (here the Pioneers hub itself).
+- id: power-the-line
+  title: Energizar a Linha
+  client: GUILDA PIONEIRA · DESPACHO
+  summary: A linha de comboios vive de célula carregada e a nossa reserva tá no fim. Traz umas seis até o Entreposto? Sem elas, meio bairro fica no escuro.
+  objective:
+    kind: deliver
+    resource: energy
+    count: 6
+    destHubId: hub-pioneers
+  reward:
+    credits: 260
+    xp: 110
+  danger: med
+  faction: pioneers
+  repRequired: 5
+  repReward: 9
+  hubId: hub-pioneers
+
+# Escort objective (MVP #7) — protect the settler convoy `convoy-pio` from the jump gate to Verdejo.
+# Tracked by `escort:arrived`; FAILS if the convoy is destroyed (returns to the board, no rep penalty).
+# Low-danger entry work in keeping with the Pioneers' frontier sector.
+- id: escort-settlers
+  title: Comboio de Colonos
+  client: COLÔNIA VERDEJO · COMUNIDADE
+  summary: Umas famílias tão partindo pra uma posse nova e não vão sozinhas — não com o que anda lá fora. Encontra elas no portão e leva até Verdejo inteirinhas. Tem criança nesse comboio.
+  objective:
+    kind: escort
+    escortId: convoy-pio
+    count: 1
+  reward:
+    credits: 240
+    xp: 120
+  danger: low
+  faction: pioneers
+  repRequired: 0
+  repReward: 10
+  hubId: hub-pioneers
+
+# --- Pioneers prerequisite chain (MVP #7): "Settling Hesper" — a 3-step arc that walks the player
+# across three objective types (explore → deliver → kill), gated by `requires` (completed-contract latch).
+#   hesper-claim ── hesper-haul ── hesper-watch
+- id: hesper-claim
+  title: Demarcar a Posse
+  client: COLÔNIA VERDEJO · TERRAS
+  summary: Abriu um trecho da deriva de Hesper pra quem quiser lavrar. Voa até o marco e registra um survey limpo, que a Guilda lavra a escritura. Pode ser a casa de alguém um dia.
+  objective:
+    kind: explore
+    poiId: poi-hesper
+    count: 1
+  reward:
+    credits: 140
+    xp: 70
+  danger: low
+  faction: pioneers
+  repRequired: 0
+  repReward: 8
+  hubId: hub-pioneers
+
+- id: hesper-haul
+  title: Fincar Raízes
+  client: COLÔNIA VERDEJO · LOGÍSTICA
+  summary: Escritura saiu — agora a posse precisa de luz e calor. Leva umas células carregadas até Verdejo pra equipar a primeira morada. Uma casa começa assim, com o básico funcionando.
+  objective:
+    kind: deliver
+    resource: energy
+    count: 6
+    destHubId: hub-pioneers
+  reward:
+    credits: 240
+    xp: 100
+  danger: low
+  faction: pioneers
+  repRequired: 0
+  repReward: 9
+  requires:
+    - hesper-claim
+  hubId: hub-pioneers
+
+- id: hesper-watch
+  title: Defender a Morada
+  client: COLÔNIA VERDEJO · MILÍCIA
+  summary: Raiders farejaram a posse nova antes mesmo de os colonos chegarem. Espanta as naves rondando pra eles acharem um lar, não uma cinza. A gente não esquece quem defende os nossos.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 6
+  reward:
+    credits: 300
+    xp: 130
+  danger: med
+  faction: pioneers
+  repRequired: 5
+  repReward: 12
+  requires:
+    - hesper-haul
+  hubId: hub-pioneers
+
+# === Sindicato · Refúgio Vermelho (hub-syndicate · syndicate) ===
+# The Syndicate posts grey work: thinning rival craft, skimming high-value crystal, and running
+# contraband to its own dock. New in Plano B (the Syndicate had no contracts before). Entry jobs are
+# ungated (repRequired 0 — a fresh pilot may start with negative Syndicate rep, and repRequired ≤ 0
+# is always available); the deeper one gates on Syndicate standing.
+- id: thin-the-herd
+  title: Rarear o Rebanho
+  client: SINDICATO · COBRANÇA
+  summary: Tem freelance caçando na nossa deriva. Limpa eles. Ninguém aqui vai te perguntar de onde você veio — e você vai ver que gosta disso rápido demais.
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 6
+  reward:
+    credits: 240
+    xp: 110
+  danger: med
+  faction: syndicate
+  repRequired: 0
+  repReward: 8
+  hubId: hub-syndicate
+
+# Mining crystal — the rarest ore (a crystal rock drops 1, priced highest), so a small count is a
+# real haul. The Syndicate launders it through the Veil.
+- id: crystal-skim
+  title: Desvio de Cristal
+  client: SINDICATO · AQUISIÇÕES
+  summary: Cristal nas rochas da deriva, antes que a Guilda registre a saca. Cinco, e traz na surdina. O que a Federação chama de roubo, aqui a gente chama de sobreviver.
+  objective:
+    kind: mine
+    resource: crystal
+    count: 5
+  reward:
+    credits: 300
+    xp: 120
+  danger: med
+  faction: syndicate
+  repRequired: 0
+  repReward: 9
+  hubId: hub-syndicate
+
+# Contraband delivery to the Syndicate's own dock — gated on standing (they don't hand the good runs
+# to strangers). Higher reward + reputation than the entry jobs.
+- id: black-market-run
+  title: Corrida do Mercado Negro
+  client: SINDICATO · O VÉU
+  summary: Uma caixa de cristal de mercado cinza até a Doca, sem disparar um manifesto. Você não perguntou o que tem dentro, e é por isso que te demos a corrida. Não comece agora.
+  objective:
+    kind: deliver
+    resource: crystal
+    count: 4
+    destHubId: hub-syndicate
+  reward:
+    credits: 520
+    xp: 200
+    resources:
+      energy: 10
+  danger: high
+  faction: syndicate
+  repRequired: 12
+  repReward: 14
+  hubId: hub-syndicate
+
+# Escort objective (MVP #7) — shadow the Syndicate "ghost runner" `convoy-syn` from the gate to the
+# Refúgio. High-danger work befitting the Syndicate's contested sector. FAILS if the runner is destroyed.
+- id: veil-escort
+  title: Corrida Fantasma
+  client: SINDICATO · O VÉU
+  summary: Um corredor leva algo quente e não anda sem cobertura. Encontra ele no portão e sombreia até o Refúgio. Perdeu a carga, perdeu o acordo — e a gente não esquece um acordo perdido.
+  objective:
+    kind: escort
+    escortId: convoy-syn
+    count: 1
+  reward:
+    credits: 420
+    xp: 170
+  danger: high
+  faction: syndicate
+  repRequired: 0
+  repReward: 11
+  hubId: hub-syndicate
+
+# --- Syndicate prerequisite chain (MVP #7): "Ghost Route" — map a blind approach, fill it, then defend
+# it. Walks explore → mine → kill; the final node gates on Syndicate standing (the good work goes to
+# proven hands). hub-scoped to hub-syndicate so the Doca's CADEIAS tab shows it.
+#   ghost-route ── quiet-haul ── red-promotion
+- id: ghost-route
+  title: Aproximação Cega
+  client: SINDICATO · AQUISIÇÕES
+  summary: Tem uma aproximação de salto que patrulha nenhuma vigia. Voa a linha e marca a baliza pro Véu correr carga sem ser visto. Depois dessa, você já sabe demais pra ser só um freelance.
+  objective:
+    kind: explore
+    poiId: poi-veil
+    count: 1
+  reward:
+    credits: 220
+    xp: 90
+  danger: high
+  faction: syndicate
+  repRequired: 0
+  repReward: 9
+  hubId: hub-syndicate
+
+- id: quiet-haul
+  title: Desvio Silencioso
+  client: SINDICATO · O VÉU
+  summary: Rota mapeada — agora enche ela. Desvia cristal da deriva cega e deposita antes que alguém conte a saca. Cada corrida dessas te amarra mais um pouco. Ninguém aqui reclama disso.
+  objective:
+    kind: mine
+    resource: crystal
+    count: 6
+  reward:
+    credits: 380
+    xp: 150
+  danger: high
+  faction: syndicate
+  repRequired: 0
+  repReward: 11
+  requires:
+    - ghost-route
+  hubId: hub-syndicate
+
+- id: red-promotion
+  title: Mereça o Vermelho
+  client: SINDICATO · COBRANÇA
+  summary: Você já sabe agir na surdina. Agora aja no barulho — quebra a tripulação rival forçando a rota do Véu e a Doca te marca como um dos nossos. Depois do vermelho, não tem mais "de passagem".
+  objective:
+    kind: kill
+    targets:
+      - Drone
+      - Fighter
+    count: 10
+  reward:
+    credits: 600
+    xp: 240
+    resources:
+      crystal: 4
+  danger: high
+  faction: syndicate
+  repRequired: 12
+  repReward: 16
+  requires:
+    - quiet-haul
+  hubId: hub-syndicate

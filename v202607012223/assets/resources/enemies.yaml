@@ -1,0 +1,668 @@
+# --- Legacy sprite-based asteroid. Kept for reference; no longer referenced by any phase.
+#     Superseded by the procedural asteroid-metal / -energy / -crystal below.
+- id: asteroid-a
+  type: Asteroid
+  # Passive obstacle: not picked up by radar, droid auto-fire or smart-missile targeting.
+  detectable: false
+  collidable:
+    health: 10
+    damage: 20
+  speed:
+    down: 1.25
+  size:
+    w: 95
+    h: 93
+  detonable:
+    explosion: explosion-a-3
+  components:
+    - type: Sprite
+      src: enemies/asteroid-a
+      size:
+        w: 95
+        h: 93
+
+# --- Procedural asteroids (pixel-art, seeded per position). Each carries a different ore,
+#     signalled by the `accent` speckle color. Passive obstacles: detectable: false.
+#     Swap `AsteroidRock` for a `Sprite` once raster art exists — nothing else changes.
+
+# Metal-bearing rock: large, tough, steel-gray speckles.
+- id: asteroid-metal
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 14
+    # Contact damage softened in the combat balance pass (MVP #8 · 2026-06-21): rocks are passive
+    # obstacles you mine through, so grazing one shouldn't near-2-shot a 35-HP Scout (20→12, ~40% cut).
+    damage: 12
+  speed:
+    down: 0
+  size:
+    w: 92
+    h: 88
+  detonable:
+    explosion: explosion-a-3
+  # Mined by destruction: drops ore into ship cargo (no XP/credits — it's not a kill).
+  reward:
+    resources:
+      metal: 3
+  # Timed respawn at the original anchor; subtle "rock" materialisation VFX.
+  respawn:
+    delay: 15000
+    warp: warp-in-rock
+  components:
+    - type: AsteroidRock
+      size:
+        w: 92
+        h: 88
+      palette:
+        rock: '#5c5f66'
+        accent: '#c2cad6'
+      spin:
+        min: 0.05
+        max: 0.2
+
+# Energy-bearing rock: mid size, teal-green glowing veins.
+- id: asteroid-energy
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 10
+    # Contact damage softened in the combat balance pass (MVP #8 · 2026-06-21): 18→11 (~40% cut).
+    damage: 11
+  speed:
+    down: 0
+  size:
+    w: 74
+    h: 76
+  detonable:
+    explosion: explosion-a-3
+  reward:
+    resources:
+      energy: 2
+  respawn:
+    delay: 15000
+    warp: warp-in-rock
+  components:
+    - type: AsteroidRock
+      size:
+        w: 74
+        h: 76
+      palette:
+        rock: '#46535b'
+        accent: '#5be6c4'
+      spin:
+        min: 0.08
+        max: 0.26
+
+# Crystal-bearing rock: small, rarer, violet crystal flecks.
+- id: asteroid-crystal
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 8
+    # Contact damage softened in the combat balance pass (MVP #8 · 2026-06-21): 16→10 (~40% cut).
+    damage: 10
+  speed:
+    down: 0
+  size:
+    w: 60
+    h: 58
+  detonable:
+    explosion: explosion-a-3
+  reward:
+    resources:
+      crystal: 1
+  respawn:
+    delay: 15000
+    warp: warp-in-rock
+  components:
+    - type: AsteroidRock
+      size:
+        w: 60
+        h: 58
+      palette:
+        rock: '#544a66'
+        accent: '#c77dff'
+      spin:
+        min: 0.1
+        max: 0.3
+
+# --- Ship wreck: dropped where the PLAYER ship dies (ADR-20). An Asteroid at heart — a
+#     persistent obstacle that damages the player on contact and is phased through by pirates
+#     (Enemy-vs-Enemy collisions are ignored), but drawn as broken hull via the ShipWreck
+#     component. Positioned dynamically at the death point by Ship.spawnDebris (placeAt).
+#     detectable: false → invisible to radar/droid/missiles, like any asteroid.
+- id: ship-debris
+  type: Asteroid
+  detectable: false
+  collidable:
+    health: 30
+    damage: 18
+  speed:
+    down: 0
+  size:
+    w: 72
+    h: 72
+  detonable:
+    explosion: explosion-a-3
+  components:
+    - type: ShipWreck
+      size:
+        w: 72
+        h: 72
+      palette:
+        hull: '#6a7079'
+        accent: '#ff7a3c'
+
+# --- Pirate enemies (GDD §7). detectable: true → radar/minimap show them and the player's
+#     droid auto-fires at them. Procedural pixel-art via PirateShip (swap for Sprite later).
+
+# Drone: stationary guard post. Faces the player and fires ranged bolts within aggro range.
+- id: pirate-drone
+  type: Drone
+  detectable: true
+  collidable:
+    health: 12
+    damage: 8
+  speed:
+    up: 0
+  size:
+    w: 40
+    h: 40
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 25
+    credits: 15
+  # Timed respawn at the guard post; full ship warp-in VFX on arrival.
+  respawn:
+    delay: 8000
+    warp: warp-in-ship
+  # aggroRadius kept under the player's radar maxRadius (sensors.yaml: 400) so an engaging
+  # drone is always detected — closing the auto-fire / homing loop.
+  ai:
+    aggroRadius: 360
+  fire:
+    projectile: pirate-bolt
+    cooldown: 1100
+  components:
+    - type: PirateShip
+      variant: drone
+      size:
+        w: 40
+        h: 40
+      # Ambient pirate = unaligned scavenger (ADR-43 · QA 2026-06-20): cold steel GRAY — a true neutral,
+      # distinct from the faction colours (the old rust read too close to the Pioneiros amber).
+      palette:
+        hull: '#3a3f47'
+        accent: '#8a909c'
+
+# Fighter: rushes the player within leashRadius of its anchor, returns when the player flees.
+# Damage is by contact.
+- id: pirate-fighter
+  type: Fighter
+  detectable: true
+  collidable:
+    health: 34
+    damage: 14
+  # speed.up doubles as the fighter's max flight speed (see Fighter.physics).
+  speed:
+    up: 2.5
+    down: 2.5
+    left: 2.5
+    right: 2.5
+  size:
+    w: 58
+    h: 52
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 35
+    credits: 25
+  respawn:
+    delay: 12000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 380
+    leashRadius: 900
+  fire:
+    projectile: pirate-bolt
+    cooldown: 1500
+  components:
+    - type: PirateShip
+      variant: fighter
+      size:
+        w: 58
+        h: 52
+      # Ambient pirate = unaligned scavenger (ADR-43 · QA 2026-06-20): cold steel GRAY — a true neutral,
+      # distinct from the faction colours (the old rust read too close to the Pioneiros amber).
+      palette:
+        hull: '#3a3f47'
+        accent: '#8a909c'
+
+# === Faction guard drones (ADR-42 emenda · 2ª fatia das silhuetas) ===
+# Each faction gets its OWN static-guard drone — a reskin of `pirate-drone` (same `type: Drone` AI:
+# stationary post that aims + fires within aggro), differing only by faction colour + projectile +
+# drone SILHOUETTE (PirateShip dispatches the drone shape by `silhouette`, echoing the faction's
+# fighter). Placed via `scatter` in the owning faction's sector only (phases.yaml). aggroRadius kept
+# ≤ the radar maxRadius (sensors.yaml: 400) so an engaging drone is always detectable.
+
+# Federation guard drone (sector-federation): precise/fast post. Cyan, fires the fast fed-volley.
+- id: fed-drone
+  type: Drone
+  detectable: true
+  faction: federation
+  collidable:
+    health: 16
+    damage: 8
+  speed:
+    up: 0
+  size:
+    w: 40
+    h: 40
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 28
+    credits: 16
+  respawn:
+    delay: 8000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 340
+  fire:
+    projectile: fed-volley
+    cooldown: 900
+  components:
+    - type: PirateShip
+      variant: drone
+      silhouette: federation
+      size:
+        w: 40
+        h: 40
+      palette:
+        hull: '#2f4a6e'
+        accent: '#4cc4ff'
+
+# Syndicate guard drone (sector-syndicate): aggressive post. Crimson, fires the stinging syn-bolt.
+- id: syn-drone
+  type: Drone
+  detectable: true
+  faction: syndicate
+  collidable:
+    health: 14
+    damage: 10
+  speed:
+    up: 0
+  size:
+    w: 40
+    h: 40
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 30
+    credits: 18
+  respawn:
+    delay: 8000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 380
+  fire:
+    projectile: syn-bolt
+    cooldown: 1100
+  components:
+    - type: PirateShip
+      variant: drone
+      silhouette: syndicate
+      size:
+        w: 40
+        h: 40
+      palette:
+        hull: '#5a2f2f'
+        accent: '#ff4d4d'
+
+# Pioneers guard drone (sector-pioneers): tanky/slow post. Amber, fires the heavy pio-bolt.
+- id: pio-drone
+  type: Drone
+  detectable: true
+  faction: pioneers
+  collidable:
+    health: 20
+    damage: 9
+  speed:
+    up: 0
+  size:
+    w: 40
+    h: 40
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 28
+    credits: 16
+  respawn:
+    delay: 8000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 300
+  fire:
+    projectile: pio-bolt
+    cooldown: 1300
+  components:
+    - type: PirateShip
+      variant: drone
+      silhouette: pioneers
+      size:
+        w: 40
+        h: 40
+      palette:
+        hull: '#5a4a2e'
+        accent: '#e8c98d'
+
+# === Faction signature enemies (ADR-42) ===
+# One per sector, layered on top of the ambient pirates above. Identity = AI class + stats + faction
+# colour + faction projectile. aggroRadius kept ≤ the radar maxRadius (sensors.yaml: 400) so an
+# engaging enemy is always detectable.
+
+# Federation Patroller (sector-federation / `1st`): disciplined sentry that walks an authored waypoint
+# route (placed via the `patrol` phase method) and only engages on aggro, then returns to its route.
+# Cyan, fires a fast precise volley.
+- id: fed-patrol
+  type: Patroller
+  detectable: true
+  faction: federation
+  collidable:
+    health: 30
+    damage: 12
+  # speed.up doubles as the patroller's max flight speed (Patroller.physics) — a measured cruise.
+  speed:
+    up: 2.2
+    down: 2.2
+    left: 2.2
+    right: 2.2
+  size:
+    w: 54
+    h: 48
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 35
+    credits: 25
+  respawn:
+    delay: 12000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 340
+    leashRadius: 700
+  fire:
+    projectile: fed-volley
+    cooldown: 900
+  components:
+    - type: PirateShip
+      variant: fighter
+      # Federation hull SHAPE (ADR-42 follow-up): clean symmetric interceptor delta.
+      silhouette: federation
+      size:
+        w: 54
+        h: 48
+      palette:
+        hull: '#2f4a6e'
+        accent: '#4cc4ff'
+
+# Syndicate Raider (sector-syndicate): aggressive hit-and-run hunter. Relentless (ignores leash) once
+# aggroed, flees below 30% hull. Magenta, fires a fast stinging bolt. Placed via `scatter`.
+- id: syn-raider
+  type: Raider
+  detectable: true
+  faction: syndicate
+  collidable:
+    health: 32
+    # Contact damage eased in the combat balance pass (MVP #8 · 2026-06-21): 15→13 — softens the
+    # relentless raider's lethality spike (it ignores leash) without dulling its aggressive identity.
+    damage: 13
+  speed:
+    up: 3.0
+    down: 3.0
+    left: 3.0
+    right: 3.0
+  size:
+    w: 56
+    h: 50
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 40
+    credits: 30
+  respawn:
+    delay: 12000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 380
+    relentless: true
+    fleeHpFrac: 0.3
+  fire:
+    projectile: syn-bolt
+    cooldown: 1300
+  components:
+    - type: PirateShip
+      variant: fighter
+      # Syndicate hull SHAPE (ADR-42 follow-up): asymmetric barbed scrap-built raider.
+      silhouette: syndicate
+      size:
+        w: 56
+        h: 50
+      palette:
+        hull: '#5a2f2f'
+        accent: '#ff4d4d'
+
+# Pioneers Sentry (sector-pioneers): a defensive guard — a Fighter reskin with short aggro + a tight
+# leash, so it hangs close to its post and punishes lingering rather than chasing far. Mint, slow
+# heavy bolt. Placed via `scatter`.
+- id: pio-sentry
+  type: Fighter
+  detectable: true
+  faction: pioneers
+  collidable:
+    health: 40
+    damage: 14
+  speed:
+    up: 2.2
+    down: 2.2
+    left: 2.2
+    right: 2.2
+  size:
+    w: 56
+    h: 50
+  detonable:
+    explosion: explosion-a-2
+  reward:
+    xp: 35
+    credits: 25
+  respawn:
+    delay: 12000
+    warp: warp-in-ship
+  ai:
+    aggroRadius: 300
+    leashRadius: 500
+  fire:
+    projectile: pio-bolt
+    cooldown: 1600
+  components:
+    - type: PirateShip
+      variant: fighter
+      # Pioneers hull SHAPE (ADR-42 follow-up): robust industrial hauler-derived transport.
+      silhouette: pioneers
+      size:
+        w: 56
+        h: 50
+      palette:
+        hull: '#5a4a2e'
+        accent: '#e8c98d'
+
+# === Escort ally (MVP #6 · 2ª metade · ADR-44) ===
+# A FRIENDLY convoy ship the player protects. Pre-placed dormant via the `patrol` phase method (one
+# authored route to a destination); it starts travelling when the matching escort contract is accepted
+# (escort:activate) and emits escort:arrived on reaching the final waypoint. Hostiles aim at the nearest
+# of {player, ally}, but it takes damage ONLY from enemy fire — no friendly fire (damage: 0 so it never
+# hurts the player either). No `reward` (it's not a kill). If destroyed → the escort contract FAILS
+# (entity:destroyed); the convoy then RESPAWNS (timed · ADR-21) back at its route start, DORMANT, so the
+# escort is retryable in-place — re-accepting the contract re-activates the waiting convoy (the route is
+# preserved via RespawnItem.route, the ctor's escort:state:request resumes it if active). Procedural
+# PirateShip recoloured friendly cyan-white + a floating HealthBar so the player can watch its hull.
+# detectable: false — the ally must be INVISIBLE to the player's own radar/droid/seeker, or the droid
+# auto-cannon + homing seeker would target the friendly convoy (radar:detected drives both). Enemies
+# still aim at it via the escort target (not radar), and the minimap shows it via entity:added (not
+# radar), so it stays a friendly blip + enemy bolts still hit it — only player auto-targeting is spared.
+- id: convoy-fed
+  type: Escortee
+  detectable: false
+  collidable:
+    health: 70
+    damage: 0
+  # speed.up doubles as the convoy's max flight speed (Escortee.physics) — a laden, unhurried transport,
+  # well under the player ship's 3.5 so escorting is a deliberate shepherding pace (it also paces to the
+  # player via FOLLOW_RANGE, so it never outruns its escort).
+  speed:
+    up: 1.3
+    down: 1.3
+    left: 1.3
+    right: 1.3
+  # Timed respawn at the route start (ADR-21) so a failed escort can be retried in-place: the convoy
+  # warps back in DORMANT (the contract is already failed → escort:state:request gets no activate); a
+  # re-accept then wakes the waiting convoy. Short delay so it's back before the player re-docks.
+  respawn:
+    delay: 4000
+    warp: warp-in-ship
+  size:
+    w: 60
+    h: 54
+  detonable:
+    explosion: explosion-a-2
+  components:
+    - type: PirateShip
+      variant: fighter
+      # Faction hull SHAPE so the convoy reads as a Federation transport; teal livery (below)
+      # still flags it FRIENDLY — shape says faction, colour says ally.
+      silhouette: federation
+      size:
+        w: 60
+        h: 54
+      # Friendly livery: teal hull + bright cyan-white accent, clearly NOT a faction/pirate colour.
+      palette:
+        hull: '#2f5d57'
+        accent: '#9ff5e4'
+    - type: HealthBar
+      outer:
+        color: white
+        pos:
+          x: 0
+          y: 10
+        size:
+          w: 2
+          h: 7
+      inner:
+        color: '#5ee7c4'
+        pos:
+          x: 1
+          y: 9
+        size:
+          h: 5
+
+# Pioneers escort convoy (MVP #7 · escort contract `escort-settlers`). Clone of `convoy-fed`: pre-placed
+# dormant via `patrol` (one-way gate→hub route) in sector-pioneers, woken by escort:activate when the
+# contract is accepted, emits escort:arrived at the last waypoint, FAILS + respawns dormant if destroyed.
+# Friendly teal livery kept (the "this is your escort" signal — minimap paints Escortee green regardless).
+- id: convoy-pio
+  type: Escortee
+  detectable: false
+  collidable:
+    health: 70
+    damage: 0
+  speed:
+    up: 1.3
+    down: 1.3
+    left: 1.3
+    right: 1.3
+  respawn:
+    delay: 4000
+    warp: warp-in-ship
+  size:
+    w: 60
+    h: 54
+  detonable:
+    explosion: explosion-a-2
+  components:
+    - type: PirateShip
+      variant: fighter
+      # Pioneers hull SHAPE; teal livery still flags it FRIENDLY (shape = faction, colour = ally).
+      silhouette: pioneers
+      size:
+        w: 60
+        h: 54
+      palette:
+        hull: '#2f5d57'
+        accent: '#9ff5e4'
+    - type: HealthBar
+      outer:
+        color: white
+        pos:
+          x: 0
+          y: 10
+        size:
+          w: 2
+          h: 7
+      inner:
+        color: '#5ee7c4'
+        pos:
+          x: 1
+          y: 9
+        size:
+          h: 5
+
+# Syndicate escort convoy (MVP #7 · escort contract `veil-escort`). Same clone of `convoy-fed`, placed in
+# sector-syndicate. A "ghost runner" the player shepherds past patrols to the Refúgio.
+- id: convoy-syn
+  type: Escortee
+  detectable: false
+  collidable:
+    health: 70
+    damage: 0
+  speed:
+    up: 1.3
+    down: 1.3
+    left: 1.3
+    right: 1.3
+  respawn:
+    delay: 4000
+    warp: warp-in-ship
+  size:
+    w: 60
+    h: 54
+  detonable:
+    explosion: explosion-a-2
+  components:
+    - type: PirateShip
+      variant: fighter
+      # Syndicate hull SHAPE; teal livery still flags it FRIENDLY (shape = faction, colour = ally).
+      silhouette: syndicate
+      size:
+        w: 60
+        h: 54
+      palette:
+        hull: '#2f5d57'
+        accent: '#9ff5e4'
+    - type: HealthBar
+      outer:
+        color: white
+        pos:
+          x: 0
+          y: 10
+        size:
+          w: 2
+          h: 7
+      inner:
+        color: '#5ee7c4'
+        pos:
+          x: 1
+          y: 9
+        size:
+          h: 5

@@ -1,0 +1,303 @@
+- id: loading-a
+  type: Scenario
+  backgroundColor: '#070b14'
+  size:
+    w: 1920
+    h: 1080
+  # The SCAN CORE loader (DS v9) is a DOM/CSS overlay — no spritesheet asset,
+  # no frame animation. The Loading component only needs `pos` (ComponentConfig
+  # contract); it renders full-screen in <body> and dispatches `scenario:load`.
+  components:
+    - type: Loading
+      pos:
+        x: center
+        y: center
+
+- id: menu-a
+  type: Scenario
+  backgroundColor: '#070b14'
+  size:
+    w: 1920
+    h: 1080
+  # Start menu (MVP feature #1) — a DOM/CSS overlay like the loader. The MainMenu component only
+  # needs `pos` (ComponentConfig contract); it renders full-screen in <body> and drives the boot
+  # flow (game:new / game:continue / game:options).
+  components:
+    - type: MainMenu
+      pos:
+        x: center
+        y: center
+
+- id: onboarding-a
+  type: Scenario
+  backgroundColor: '#04060c'
+  size:
+    w: 1920
+    h: 1080
+  # Narrative Onboarding (ADR-46) — a DOM/CSS overlay like the menu/loader that REPLACES the old
+  # create-a + ship-a screens with one continuous diegetic scene (voz da memória, 4 beats NOME → ORIGEM
+  # → NAVE → FECHO → acordar). The NarrativeOnboarding component only needs `pos` (ComponentConfig
+  # contract); it renders full-screen in <body> and drives onboarding (origins:request / ships:request
+  # / game:onboard-confirm / game:onboard-back).
+  components:
+    - type: NarrativeOnboarding
+      pos:
+        x: center
+        y: center
+
+- id: 1st
+  type: Scenario
+  backgroundColor: '#070b14'
+  size:
+    w: 1920
+    h: 1080
+  phase:
+    id: 1st
+  # The cockpit HUD is identical across every gameplay sector (MVP feature #4 · World backbone), so
+  # it's anchored here and aliased by the sector scenarios below (`*cockpit-components` /
+  # `*cockpit-setup`) — DRY instead of duplicating ~230 lines per sector. A sector scenario differs
+  # only in `id` + `phase.id` (its world/content live in the phase). Known cosmetic gap: the SectorTag
+  # text below is shared, so every sector reads "BELT-04" until the SectorTag goes dynamic (reads the
+  # sector name from `world:state`) — a Plano B / polish follow-up.
+  components: &cockpit-components
+    # === Top-left cluster — LIVE (de-mocked 2026-06-10) ===
+    # SectorTag dot + ALERTA = real threat (radar:contacts + player:damaged); Clock = mission timer
+    # (counts up from T+00:00); DroidPip = real auto-cannon (droid:state/droid:fire); RadarPip = the
+    # equipped radar module tier + range (module:state · ADR-37, icon pulses while an upgrade is
+    # available). The config below is just the labels — no more fixed status/mode/charge values.
+    - type: SectorTag
+      pos: { x: '24', y: '20' }
+      text: SECTOR · BELT-04
+    - type: Clock
+      pos: { x: '24', y: '60' }
+      tick: true
+    # DroidPip/RadarPip grew to a 40px radial-ring instrument zone (~54px tall) in the v7 pip
+    # reconciliation, so the cluster offsets were re-spaced for a comfortable gap between widgets.
+    - type: DroidPip
+      pos: { x: '24', y: '96' }
+      label: DROID
+    - type: RadarPip
+      pos: { x: '24', y: '168' }
+      label: RADAR
+
+    # === Top-right — CREDITS readout, mirroring the minimap's 16px margin ===
+    # Minimap sits at margin m=16 (minimap.ts), so its left edge = 1920 - 240 - 16 = 1664 and its
+    # top = 16. Score has a fixed width (200) and right-aligns its content, so x=1448 lands the
+    # right edge at 1648 — a 16px gap to the minimap — and y=16 aligns their tops.
+    - type: Score
+      pos: { x: 'right:272', y: '16' }
+      score: 0
+
+    # === Cargo cap meter (MVP feature #3) — under CREDITS, right edges aligned ===
+    # Live `X/Y` of the cargo hold (sum of the 3 ores / the equipped ship class's cap). Consumes
+    # `cargo:state { cargoUsed, cargoCap }`. Right-anchored (right:272 → right edge 1648, same as the
+    # Score above) so it grows leftward like the credits readout; y64 sits just below it.
+    - type: CargoMeter
+      pos: { x: 'right:272', y: '64' }
+      label: CARGO
+
+    # === Floating toast (left, BELOW the top-left pip cluster) ===
+    # The cluster ends at the RadarPip (y168, ~54px tall after the v7 pip resize → ~y222), so the
+    # toast starts at y240 to clear it with a comfortable gap.
+    - type: Toast
+      pos: { x: '24', y: '240' }
+      mode: stack
+      width: 320
+      autoDismiss: 6000
+
+    # === Bottom-left log (aligned with bottom card cluster) ===
+    # Starts EMPTY: the SYS.LOG is fed by real domain events (mining pickups, kill bounty, level
+    # up, ship death, respawn) — see EventLog widget. No mock seed entries.
+    # Anchored by its BASE (bottom:32 → base aligns with the bottom card cluster ~1048) so it grows
+    # UPWARD as events arrive — header + newest row rise, older rows stay pinned at the base — instead
+    # of hanging from a fixed top and growing down into the playfield.
+    - type: EventLog
+      pos: { x: '24', y: 'bottom:32' }
+      width: 460
+      maxRows: 6
+
+    # === Bottom-center cluster (A3 layout: HP card · Radar · Armaments card) ===
+    # Reference: docs/design/.../cockpit-refined.jsx CockpitAtmospheric().
+    # The three items sit at bottom:24 with gap:18, total ~746px wide centered.
+    # Panels are listed FIRST so they render BEHIND the widgets on top.
+
+    # Bottom-center cluster — geometry (design space 1920×1080), anchored near the screen bottom:
+    #   Radar disc (diameter 176, centered x) is the tallest element, its bottom ~16px from the
+    #   viewport bottom → center line at y≈976. The two flanking cards share that center line
+    #   (centers at 976), so the bigger radar slightly over/under-hangs them — like the reference.
+    #   Equal 7px gap to the radar (pilot right edge 865 / radar left 872; armaments left 1055 /
+    #   radar right 1048). The RadarHud is now a DOM widget, so it scales with the cards at any size.
+
+    # Card 1 frame — Pilot (Name/HULL/XP). 280×146, corners on. 16px padding left/right/top; the
+    # extra 2px height (vs armaments' 144) gives the XP bar a touch more bottom padding so it
+    # matches the Name→top gap (the pair need NOT be the same height). Bars 248 wide (280 - 2×16).
+    # Center 976 → top = 976 - 73 = 903.
+    - type: Panel
+      pos: { x: 'fromcenter:-375', y: 'frombottom:177' }
+      width: 280
+      height: 146
+      cut: md
+      corners: true
+
+    # Card 3 frame — Armaments. 280×144, mirrored gap to the radar (left edge 1055). Center 976 → top 904.
+    - type: Panel
+      pos: { x: 'fromcenter:95', y: 'frombottom:176' }
+      width: 280
+      height: 144
+      label: ARMAMENTS
+      cut: md
+      corners: true
+
+    # NOTE: radar has NO card wrapper in A3 — it's just the disc.
+
+    # Widgets on top of Card 1 (Pilot) — left/top padding 16 from the panel (585,903).
+    # Rows: PilotCard (y919) · HULL (y971) · XP (y1013), 14px gaps, 18px bottom padding.
+    # name/sub come live from `player:state` (the pilot name + chosen origin set on character
+    # creation · MVP feature #2). No config name → the widget shows a neutral fallback for the one
+    # frame before the state arrives (or on an old save without a name).
+    - type: PilotCard
+      pos: { x: 'fromcenter:-359', y: 'frombottom:161' }
+      size: 38
+    # HULL is live: the Ship emits `player:damaged { hp, max }` on spawn + on damage
+    # (health 50 from characters.yaml). These config numbers are placeholders overwritten on mount.
+    # width 248 = panel 280 - 2×16 padding; matches the XP bar below it.
+    - type: Health
+      pos: { x: 'fromcenter:-359', y: 'frombottom:109' }
+      value: 50
+      max: 50
+      label: HULL
+      size: md
+      width: 248
+    # NOTE: the Shields widget was removed — shields are not a domain concept yet (mocked 4/6).
+    # The component code stays; parked in docs/features/ideas/ui/2026-06-05-hud-mock-components-parking.md.
+    # Pilot progression — LVL + XP bar. Values are live (AttributeSystem → player:state);
+    # the config numbers are placeholders overwritten on mount. width 248 = same as the HULL bar.
+    - type: XPBar
+      pos: { x: 'fromcenter:-359', y: 'frombottom:67' }
+      width: 248
+
+    # Radar — standalone disc (DOM widget). diameter 176; the widget canvas adds a 12px MARGIN all
+    # around (so the ring stroke + glow aren't clipped) → canvas is 200×200, disc center at canvas
+    # 100. To keep the disc center on the cluster line (976): top = 976 - 100 = 876.
+    - type: RadarHud
+      pos: { x: 'center', y: 'frombottom:204' }
+      diameter: 176
+      label: RDR-01
+
+    # Widget on top of Card 3 (Armaments) — 248 wide (2 cards × 116 + 16 gap), left pad 16
+    # (x1071), bottom pad below the ARMAMENTS label. Center 976 → y948.
+    - type: Weapons
+      pos: { x: 'fromcenter:111', y: 'frombottom:132' }
+      missileAmmo: 6
+      missileMax: 6
+      cooldown: 0.15
+
+    # === Bottom-right corner — VEL readout inside small card ===
+    # NOTE: FUEL and ALT were removed — neither is a domain concept (mocked). Only VEL is real
+    # (live ship telemetry). Parked in docs/features/ideas/ui/2026-06-05-hud-mock-components-parking.md.
+    # Narrowed horizontally for just VEL (right-anchored: right edge stays at 1900). Left/top padding
+    # 14; the right padding is larger by design (the number grows). Height unchanged.
+    - type: Panel
+      pos: { x: 'right:20', y: 'frombottom:76' }
+      width: 96
+      height: 52
+      cut: sm
+      corners: false
+    - type: SpeedReadout
+      pos: { x: 'fromright:102', y: 'frombottom:62' }
+      vel: 240
+      velMax: 380
+
+    # === Dash cooldown pip (ADR-36) — bottom-right, to the LEFT of the VEL readout ===
+    # Pairs the dash (a speed burst / dodge) with the velocity telemetry. Live: the Ship emits
+    # `dash:fire { cooldown }` / `dash:state { ready, cooldownMs }`; the ring + countdown are real
+    # (cooldown already Reflexo-scaled). The `cooldown` below is just a placeholder until the first
+    # event. Right edge (~1676 + ~116 = 1792) sits ~12px left of the VEL card (left edge 1804);
+    # vertical centers aligned to the VEL card (center 1030 → top 1003).
+    - type: DashPip
+      pos: { x: 'fromright:244', y: 'frombottom:76' }
+      label: DASH
+      cooldown: 2
+      # Ring diameter (px). 40 + the 12px vertical padding = a 52px box, matching the VEL readout's
+      # panel height exactly (top 1004, h52). Tune here if it should be bigger/smaller.
+      size: 40
+
+    # === Damage arc overlay (Canvas, reacts to entity:damaged) ===
+    - type: DamageArc
+      pos: { x: '0', y: '0' }
+
+    # === Floating damage numbers (DOM/WAAPI layer, reacts to entity:hit · ADR-39) ===
+    # Full-overlay layer that pops a number over anything that takes damage; colour = who took it
+    # (Ship = red incoming, else mint outgoing). One instance covers the playfield.
+    - type: DamageNumbers
+      pos: { x: '0', y: '0' }
+
+    # === World minimap with fog of war (flush top-right of the playfield) ===
+    - type: Minimap
+      pos: { x: right, y: top }
+      width: 240
+      height: 135
+      cellSize: 300
+      revealRadius: 1000
+
+    # === Active contract (right rail, under the minimap) ===
+    # Live readout of the ContractSystem (ADR-24): title/objective/progress/reward + KILLS count.
+    # Descriptor is mock-free — fed by `contract:state` (the config values are placeholders the
+    # first `contract:state` overwrites). Right edge aligned to the minimap (1904): x = 1904 - 280.
+    # Minimap bottom = 16 + 135 = 151; +17 gap → y 168.
+    - type: Contract
+      pos: { x: 'right:16', y: '168' }
+      width: 280
+      expanded: true
+
+    # === Dock prompt (bottom-center, under the ship) ===
+    # Hidden until the ship enters a hub's dockRange (hub:dock-available); "[F] ATRACAR · <hub>".
+    - type: DockPrompt
+      pos: { x: center, y: bottom }
+  setup: &cockpit-setup
+    images:
+      - backgrounds/1st-parallax-a
+      - backgrounds/1st-parallax-b
+      - backgrounds/1st-starfield-a-vertical
+      - characters/one-f-a-vertical
+      - controls/cursor-a
+      - enemies/asteroid-a
+      - explosions/explosion-a-1
+      - explosions/explosion-a-2
+      - objects/starbase
+      - projectiles/bullet
+      - projectiles/missile-vertical
+    entities:
+      - id: explosion-a-1.1
+        resource: explosions
+      - id: explosion-a-2
+        resource: explosions
+      - id: explosion-a-3
+        resource: explosions
+
+# === Faction sectors (MVP feature #4 · World backbone, Plano A) ===
+# One gameplay sector per faction, reached via the star map (jump gate). Each is a full scenario but
+# REUSES the `1st` cockpit HUD + asset setup via YAML alias (*cockpit-components / *cockpit-setup) —
+# only the `id` + `phase.id` differ; the world/content (hub, asteroids, jump gate) live in the phase
+# (phases.yaml). `sector-federation` is NOT here: it reuses the original `1st` scenario above.
+- id: sector-pioneers
+  type: Scenario
+  backgroundColor: '#070b14'
+  size:
+    w: 1920
+    h: 1080
+  phase:
+    id: sector-pioneers
+  components: *cockpit-components
+  setup: *cockpit-setup
+
+- id: sector-syndicate
+  type: Scenario
+  backgroundColor: '#070b14'
+  size:
+    w: 1920
+    h: 1080
+  phase:
+    id: sector-syndicate
+  components: *cockpit-components
+  setup: *cockpit-setup
